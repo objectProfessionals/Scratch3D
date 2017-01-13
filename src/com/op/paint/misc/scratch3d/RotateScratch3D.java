@@ -28,6 +28,7 @@ import com.owens.oobjloader.builder.VertexGeometric;
 public class RotateScratch3D {
 
 	private String dir = "host/images/out/misc/scratch3d/";
+	private String objDir = "objFiles/";
 	// private String obj = "tieFighter";
 	private String obj = "cubeLow";
 	// private String obj = "sphereLow";
@@ -127,7 +128,7 @@ public class RotateScratch3D {
 		opG.setFont(new Font("TimesRoman", Font.PLAIN, 50));
 		Build builder = new Build();
 
-		Parse obj0 = new Parse(builder, dir + obj + ".obj");
+		Parse obj0 = new Parse(builder, dir + objDir + obj + ".obj");
 		ArrayList<VertexGeometric> v0 = obj0.builder.getVertices();
 		for (VertexGeometric v : v0) {
 			// Point3f p = new Point3f(v.x, -v.z, v.y);
