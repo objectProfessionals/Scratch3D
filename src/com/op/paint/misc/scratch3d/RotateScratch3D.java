@@ -37,7 +37,7 @@ public class RotateScratch3D {
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
 	private String src = "ROTscratch3D-" + obj;
-	private static boolean test = true;
+	private static boolean test = false;
 	private static boolean saveSVG = false;
 
 	double dpi = 1000;
@@ -61,7 +61,7 @@ public class RotateScratch3D {
 	double radArcPosZMaxF = 0.5;
 	double radArcNegZMaxF = 1;
 	double totRotAng = 30; // 45;
-	double incRotAng = 1;
+	double incRotAng = 2;
 	double incAngArc = incRotAng*2;
 	double angArcDrawingF = 1;
 	boolean lines = false;
@@ -72,7 +72,7 @@ public class RotateScratch3D {
 	private int cx = (int) (w / 2.0);
 	private int cy = (int) (h / 2.0);
 
-	float strokemm = 0.25f;
+	float strokemm = 0.5f;
 	float stroke = (float) (dpi * ((strokemm) / mm2in)); // (dpi / 120.0);
 	float scratchGreyF = 0.01f;
 
@@ -105,7 +105,6 @@ public class RotateScratch3D {
 		vGrooved = true;
 		lines = false;
 		incAngArc = 180;
-		strokemm = 1f;
 
 		init();
 
@@ -113,7 +112,7 @@ public class RotateScratch3D {
 			drawArc(cx, cy, d, 0, false);
 		}
 
-		strokemm = 0.1f;
+		strokemm = 1f;
 		stroke = (float) (dpi * ((strokemm / 1.3) / mm2in));
 		drawAllScratches();
 		save();
