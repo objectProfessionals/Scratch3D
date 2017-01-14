@@ -28,15 +28,17 @@ import com.owens.oobjloader.builder.VertexGeometric;
 public class RotateScratch3D {
 
 	private String dir = "host/images/out/misc/scratch3d/";
+	private String opDir = "../output/";
 	private String objDir = "objFiles/";
 	// private String obj = "tieFighter";
-	private String obj = "cubeLow";
+	private String obj = "cubeLowWithEdges";
 	// private String obj = "sphereLow";
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
 	private String src = "ROTscratch3D-" + obj;
-	private static boolean test = false;
+	private static boolean test = true;
+	private static boolean saveSVG = false;
 
 	double dpi = 1000;
 	double mm2in = 25.4;
@@ -45,8 +47,8 @@ public class RotateScratch3D {
 	double radArcmm = 20.0;
 
 	boolean adjustForPerspective = false;
-	double perspectiveAdjustFr = 1.05;
-	double perspectiveAdjustBa = 0.95;
+	double perspectiveAdjustFr = 1.01;
+	double perspectiveAdjustBa = 0.99;
 
 	private double wmm = scalemm * 4;
 	private double hmm = scalemm * 4;
@@ -55,20 +57,22 @@ public class RotateScratch3D {
 
 	double scaleMain = dpi * (scalemm / mm2in);
 	double radArc = dpi * (radArcmm / mm2in);
-	double radArcMinF = 0.25;
+	double radArcMinF = 0.1;
 	double radArcPosZMaxF = 0.5;
 	double radArcNegZMaxF = 1;
-	double totAng = 0; // 45;
-	double angArc = 30;
+	double totRotAng = 30; // 45;
+	double incRotAng = 1;
+	double incAngArc = incRotAng*2;
 	double angArcDrawingF = 1;
-	boolean lines = true;
+	boolean lines = false;
 	boolean vGrooved = true;
-	boolean preview = true;
+	boolean preview = false;
+	double previewAngle = 0;
 
 	private int cx = (int) (w / 2.0);
 	private int cy = (int) (h / 2.0);
 
-	float strokemm = 0.1f;
+	float strokemm = 0.25f;
 	float stroke = (float) (dpi * ((strokemm) / mm2in)); // (dpi / 120.0);
 	float scratchGreyF = 0.01f;
 
@@ -100,8 +104,8 @@ public class RotateScratch3D {
 		src = "ROTscratch3D-CIRCLES";
 		vGrooved = true;
 		lines = false;
-		angArc = 90;
-		strokemm = 0.1f;
+		incAngArc = 180;
+		strokemm = 1f;
 
 		init();
 
@@ -137,10 +141,6 @@ public class RotateScratch3D {
 
 		}
 		originalFaces = obj0.builder.getFaces();
-
-		if (adjustForPerspective) {
-			allPoints = adjustPoints(allPoints);
-		}
 	}
 
 	private void drawAllPoints() {
@@ -157,13 +157,13 @@ public class RotateScratch3D {
 		if (preview) {
 			int i = 0;
 			for (VertexGeometric p : allPoints) {
-				drawPoint(allPoints.get(i), 5);
+				drawPoint(allPoints.get(i), previewAngle);
 				i++;
 			}
 		} else {
 			int i = 0;
 			for (VertexGeometric p : allPoints) {
-				for (double a = 0; a >= -totAng; a = a - angArc) {
+				for (double a = 0; a >= -totRotAng; a = a - incRotAng) {
 					drawPoint(allPoints.get(i), a);
 				}
 				i++;
@@ -171,7 +171,7 @@ public class RotateScratch3D {
 
 			i = 0;
 			for (VertexGeometric p : allPoints) {
-				for (double a = angArc; a <= totAng; a = a + angArc) {
+				for (double a = 0; a <= totRotAng; a = a + incRotAng) {
 					drawPoint(allPoints.get(i), a);
 				}
 				i++;
@@ -265,7 +265,12 @@ public class RotateScratch3D {
 
 		VertexGeometric vg = new VertexGeometric((float) x2, (float) y2,
 				(float) z2);
-		return vg;
+		VertexGeometric vga = vg;
+		if (adjustForPerspective) {
+			vga = adjustPoint(vg);
+		}
+
+		return vga;
 	}
 
 	private boolean isVertexVisible(ArrayList<Face> faces, VertexGeometric p) {
@@ -348,8 +353,8 @@ public class RotateScratch3D {
 		double angOff = z > 0 ? 270 : 90;
 		double angD = z < 0 ? aDegs : -aDegs;
 
-		double angStart = angOff - angD - angArcDrawingF * angArc / 2.0;
-		double angPoint = (angStart + angArcDrawingF * angArc / 2.0) % 360;
+		double angStart = angOff - angD - angArcDrawingF * incAngArc / 2.0;
+		double angPoint = (angStart + angArcDrawingF * incAngArc / 2.0) % 360;
 
 		double rad = radArc;
 		if (z > 0) {
@@ -366,7 +371,7 @@ public class RotateScratch3D {
 		int xtl = (int) (xc - rad);
 		int ytl = (int) (yc - rad);
 		int r = (int) rad;
-		int angArcDraw = (int) (angArcDrawingF * angArc);
+		int angArcDraw = (int) (angArcDrawingF * incAngArc);
 
 		if (!vGrooved) {
 			opG.setColor(angPoint > 180 || angPoint < 0 ? Color.RED
@@ -436,15 +441,20 @@ public class RotateScratch3D {
 			ArrayList<VertexGeometric> points) {
 		ArrayList<VertexGeometric> points2 = new ArrayList<VertexGeometric>();
 		for (VertexGeometric p : points) {
-			double sc = getScaleForAdjusts(p);
-			double x = p.x * sc;
-			double y = p.y * sc;
-			VertexGeometric vg = new VertexGeometric((float) x, (float) y,
-					(float) p.z);
+			VertexGeometric vg = adjustPoint(p);
 			points2.add(vg);
 		}
 		return points2;
 	}
+
+private VertexGeometric adjustPoint(VertexGeometric p) {
+	double sc = getScaleForAdjusts(p);
+	double x = p.x * sc;
+	double y = p.y * sc;
+	VertexGeometric vg = new VertexGeometric((float) x, (float) y,
+			(float) p.z);
+	return vg;
+}
 
 	private void init() throws FileNotFoundException,
 			UnsupportedEncodingException {
@@ -462,17 +472,20 @@ public class RotateScratch3D {
 		opG.setColor(Color.WHITE);
 		opG.fillRect(0, 0, ww, hh);
 
-		writer = new PrintWriter(dir + "3dScratch" + obj + ".svg", "UTF-8");
-		writer.println("<svg width=\"" + ((int) w) + "\" height=\""
-				+ ((int) (h * 1.25))
-				+ "\" xmlns=\"http://www.w3.org/2000/svg\">");
-		writer.println("");
+		if (saveSVG) {
+			writer = new PrintWriter(dir + "3dScratch" + obj + ".svg", "UTF-8");
+			writer.println("<svg width=\"" + ((int) w) + "\" height=\""
+					+ ((int) (h * 1.25))
+					+ "\" xmlns=\"http://www.w3.org/2000/svg\">");
+			writer.println("");
+		}
 
 		System.out.println("...finished initialising");
 	}
 
 	private void save() throws IOException {
-		File op1 = new File(dir + src + "OUT" + ".png");
+		String suff = "-"+strokemm + "-"+totRotAng+"-"+incRotAng +"-"+incAngArc;
+		File op1 = new File(opDir + src + "OUT" +suff+ ".png");
 		try {
 			RendererUtils.savePNGFile(obi, op1, dpi);
 		} catch (Exception e) {
@@ -481,11 +494,13 @@ public class RotateScratch3D {
 		}
 		System.out.println("Saved " + op1.getPath());
 
-		writer.println("<!-- radmm = " + scalemm + " -->");
-		writer.println("<!-- adjustFr = " + perspectiveAdjustFr + " -->");
-		writer.println("<!-- adjustBa = " + perspectiveAdjustBa + " -->");
+		if (saveSVG) {
+			writer.println("<!-- radmm = " + scalemm + " -->");
+			writer.println("<!-- adjustFr = " + perspectiveAdjustFr + " -->");
+			writer.println("<!-- adjustBa = " + perspectiveAdjustBa + " -->");
 
-		writer.println("</svg>");
-		writer.close();
+			writer.println("</svg>");
+			//writer.close();
+		}
 	}
 }
