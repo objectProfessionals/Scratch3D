@@ -31,7 +31,8 @@ public class RotateScratch3D {
 	private String opDir = "../output/";
 	private String objDir = "objFiles/";
 	// private String obj = "tieFighter";
-	private String obj = "cubeLowWithEdges";
+	private String obj = "DeathStar";
+	//private String obj = "cubeLowWithEdges";
 	// private String obj = "sphereLow";
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
@@ -72,7 +73,7 @@ public class RotateScratch3D {
 	private int cx = (int) (w / 2.0);
 	private int cy = (int) (h / 2.0);
 
-	float strokemm = 0.5f;
+	float strokemm = 0.25f;
 	float stroke = (float) (dpi * ((strokemm) / mm2in)); // (dpi / 120.0);
 	float scratchGreyF = 0.01f;
 
