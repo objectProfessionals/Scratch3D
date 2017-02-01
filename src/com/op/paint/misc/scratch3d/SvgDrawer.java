@@ -60,15 +60,16 @@ public class SvgDrawer {
 			}
 		}
 		addToSVG(sb);
-		numSvgs++;
 		System.out.println("numSvgs = " + numSvgs);
 	}
 
 	void addToSVG(StringBuffer sb) {
+		numSvgs++;
 		writer.println(sb.toString());
 	}
 
 	void addToSVG(String s) {
+		numSvgs++;
 		writer.println(s);
 	}
 
@@ -108,13 +109,13 @@ public class SvgDrawer {
 
 		writer.println("</svg>");
 		writer.close();
-		System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg");
+		System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg numSvgs=" + numSvgs);
 	}
 
 	VertexGeometric polarToCartesian(double centerX, double centerY, double radius, double angleInDegrees) {
 		double angleInRadians = Math.toRadians(angleInDegrees);
 		float x = (float) (centerX + (radius * Math.cos(angleInRadians)));
-		float y = (float) (centerY - (radius * Math.sin(angleInRadians)));
+		float y = (float) (centerY + (radius * Math.sin(angleInRadians))); // -
 
 		return new VertexGeometric(x, y, 0);
 	}

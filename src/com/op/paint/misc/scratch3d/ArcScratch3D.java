@@ -71,7 +71,7 @@ public class ArcScratch3D {
 		init();
 		pngDrawer.init();
 		// allPoints = adjustPoints(allPoints);
-		objLoader.loadOBJ(dir + objDir + obj, allPoints, originalFaces);
+		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
 
 		drawAllPoints();
 		save();

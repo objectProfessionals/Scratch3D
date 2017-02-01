@@ -76,7 +76,7 @@ public class RotateScratch3D {
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
 	ObjLoader objLoader = new ObjLoader();
-	SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h);
+	SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h);
 	VertexTransformer vertexTransformer;
 
 	private static RotateScratch3D scratch3D = new RotateScratch3D();
@@ -110,9 +110,9 @@ public class RotateScratch3D {
 	private void draw() throws FileNotFoundException, IOException {
 		initPNG();
 
-		svgDescriber.startSVG();
+		svgDrawer.startSVG();
 
-		objLoader.loadOBJ(dir + objDir + obj, allPoints, originalFaces);
+		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces);
 		drawAllPoints();
 
@@ -157,7 +157,7 @@ public class RotateScratch3D {
 		}
 
 		drawAllScratches();
-		svgDescriber.drawAllScratches();
+		svgDrawer.drawAllScratches();
 	}
 
 	private void drawAllScratches() {
@@ -167,7 +167,7 @@ public class RotateScratch3D {
 	}
 
 	private void drawAllScratches(float f) {
-		for (ScratchArc arc : svgDescriber.allScratches) {
+		for (ScratchArc arc : svgDrawer.allScratches) {
 			drawArc(arc.xtl, arc.ytl, arc.d, arc.angStart, arc.angArcDraw, f);
 		}
 	}
@@ -235,9 +235,9 @@ public class RotateScratch3D {
 			opG.setColor(angPoint % 360 > 180 ? Color.RED : Color.BLUE);
 			opG.setStroke(new BasicStroke(stroke));
 			opG.drawArc(xtl, ytl, r * 2, r * 2, (int) angStart, (int) angArcDraw);
-			svgDescriber.saveArc(xtl, ytl, xtl + r, ytl + r, r, r * 2, (int) angStart, (int) angArcDraw);
+			svgDrawer.saveArc(xtl, ytl, xtl + r, ytl + r, r, r * 2, (int) angStart, (int) angArcDraw);
 		} else {
-			svgDescriber.saveArc((xc - rad), (yc - rad), xc, yc, r, r * 2, (int) angStart, (int) angArcDraw);
+			svgDrawer.saveArc((xc - rad), (yc - rad), xc, yc, r, r * 2, (int) angStart, (int) angArcDraw);
 		}
 
 		if (lines) {
@@ -280,7 +280,7 @@ public class RotateScratch3D {
 		System.out.println("numArcs=" + numArcs + " " + " Saved " + op1.getPath());
 
 		if (saveSVG) {
-			svgDescriber.endSVG();
+			svgDrawer.endSVG();
 		}
 	}
 }
