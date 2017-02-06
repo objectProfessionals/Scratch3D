@@ -20,7 +20,7 @@ public class VertexTransformer {
 			Face newFace = new Face();
 			for (FaceVertex fv : face.vertices) {
 				FaceVertex fv2 = new FaceVertex();
-				VertexGeometric vg = new VertexGeometric(fv.v.x, -fv.v.z, fv.v.y);
+				VertexGeometric vg = new VertexGeometric(fv.v.x, fv.v.y, fv.v.z);
 				fv2.v = transformVertex(vg, aDegs, adjustForPerspective, objLoader);
 				newFace.vertices.add(fv2);
 			}
@@ -37,13 +37,13 @@ public class VertexTransformer {
 		double z = p1.z;
 
 		double xzR = Math.sqrt(x * x + z * z);
-		double xzAng = Math.atan2(-z, x);
+		double xzAng = Math.atan2(z, x);
 		double xzAngDeg = Math.toDegrees(xzAng);
 		double xzAngTot = xzAngDeg + aDegs;
 
 		double x2 = xzR * Math.cos(aa + xzAng);
 		double y2 = y;
-		double z2 = -xzR * Math.sin(aa + xzAng);
+		double z2 = xzR * Math.sin(aa + xzAng);
 
 		VertexGeometric vg = new VertexGeometric((float) x2, (float) y2, (float) z2);
 		VertexGeometric vga = vg;

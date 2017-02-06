@@ -30,7 +30,7 @@ public class SvgDrawer {
 	void drawAllScratches() {
 		for (ScratchArc arc : allScratches) {
 			if (true) {
-				drawArcSVG(arc.xc, arc.yc, arc.r, arc.angStart, arc.angStart + arc.angArcDraw);
+				drawArcNumOfSVGs(arc.xc, arc.yc, arc.r, arc.angStart, arc.angStart + arc.angArcDraw);
 			}
 		}
 	}
@@ -42,12 +42,18 @@ public class SvgDrawer {
 		}
 	}
 
-	void drawArcSVG(double xc, double yc, double rad, double angSt, double angEn) {
+	void drawAndAddArc(double xc, double yc, double rad, double angSt, double angEn) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(addArc(xc, yc, rad, angSt, angEn));
+		writeToSVG(sb);
+	}
+
+	void drawArcNumOfSVGs(double xc, double yc, double rad, double angSt, double angEn) {
 		// <path d="M10 10 C 20 20, 40 20, 50 10" stroke="black"
 		// fill="transparent"/>
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(drawArc(xc, yc, rad, angSt, angEn));
+		sb.append(addArc(xc, yc, rad, angSt, angEn));
 		// double ang = ((angSt + angEn) / 2) % 360;
 		// String col = ang >= 180 ? "red" : "blue";
 		if (splitSVG) {
@@ -56,24 +62,24 @@ public class SvgDrawer {
 					endSVG();
 					svgFileCount++;
 				}
-				startSVG();
+				startSVG(true, false);
 			}
 		}
-		addToSVG(sb);
+		writeToSVG(sb);
 		System.out.println("numSvgs = " + numSvgs);
 	}
 
-	void addToSVG(StringBuffer sb) {
+	void writeToSVG(StringBuffer sb) {
 		numSvgs++;
 		writer.println(sb.toString());
 	}
 
-	void addToSVG(String s) {
+	void writeToSVG(String s) {
 		numSvgs++;
 		writer.println(s);
 	}
 
-	void startSVG() {
+	void startSVG(boolean square, boolean circle) {
 		if (splitSVG) {
 			return;
 		}
@@ -96,8 +102,13 @@ public class SvgDrawer {
 		// + (h - rad * 2) + "\" rx=\"" + rad + "\" ry=\"" + rad + "\"
 		// stroke=\"blue\" fill=\"none\"/>");
 		writer.println("<path d=\"");
-		writer.println(
-				"M" + rad + " " + rad + " L" + dd + " " + rad + " L" + dd + " " + dd + " L" + rad + " " + dd + " Z");
+		if (square) {
+			writer.println("M" + rad + " " + rad + " L" + dd + " " + rad + " L" + dd + " " + dd + " L" + rad + " " + dd
+					+ " Z");
+		} else if (circle) {
+			addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.95 / 2));
+		}
+
 	}
 
 	void endSVG() {
@@ -120,7 +131,7 @@ public class SvgDrawer {
 		return new VertexGeometric(x, y, 0);
 	}
 
-	String drawArc(double cx, double cy, double radius, double startAngle, double endAngle) {
+	String addArc(double cx, double cy, double radius, double startAngle, double endAngle) {
 
 		VertexGeometric start = polarToCartesian(cx, cy, radius, startAngle);
 		VertexGeometric end = polarToCartesian(cx, cy, radius, endAngle);
@@ -133,10 +144,28 @@ public class SvgDrawer {
 		return d;
 	}
 
-	String drawLine(double x1, double y1, double x2, double y2) {
+	String addCircle(double cx, double cy, double radius) {
 
+		String largeArc = " 1 ";
+		VertexGeometric start = polarToCartesian(cx, cy, radius, 359.99);
+		VertexGeometric end = polarToCartesian(cx, cy, radius, 0);
+		String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radius) + " " + formatD(radius)
+				+ " 0" + largeArc + "0 " + formatD(end.x) + " " + formatD(end.y);
+		return d;
+	}
+
+	String addLine(double x1, double y1, double x2, double y2) {
 		String d = "M" + formatD(x1) + " " + formatD(y1) + " L " + formatD(x2) + " " + formatD(y2) + " ";
+		return d;
+	}
 
+	String moveTo(double x1, double y1) {
+		String d = "M" + formatD(x1) + " " + formatD(y1);
+		return d;
+	}
+
+	String lineTo(double x2, double y2) {
+		String d = " L" + formatD(x2) + " " + formatD(y2) + " ";
 		return d;
 	}
 

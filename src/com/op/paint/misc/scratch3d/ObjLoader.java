@@ -11,7 +11,11 @@ import com.owens.oobjloader.builder.FaceVertex;
 import com.owens.oobjloader.builder.VertexGeometric;
 
 public class ObjLoader {
-	double vanishZ = 10;
+	double vanishZ = 0;
+
+	public ObjLoader(double vanishZ) {
+		this.vanishZ = vanishZ;
+	}
 
 	public ArrayList<Face> loadOBJ(String dirAndFile, ArrayList<VertexGeometric> allPoints)
 			throws FileNotFoundException, IOException {
@@ -21,7 +25,7 @@ public class ObjLoader {
 		ArrayList<VertexGeometric> v0 = obj0.builder.getVertices();
 		for (VertexGeometric v : v0) {
 			// Point3f p = new Point3f(v.x, -v.z, v.y);
-			VertexGeometric vg = new VertexGeometric(v.x, -v.z, v.y);
+			VertexGeometric vg = new VertexGeometric(v.x, v.y, v.z);
 			allPoints.add(vg);
 
 		}
