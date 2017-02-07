@@ -10,8 +10,8 @@ import com.owens.oobjloader.builder.VertexGeometric;
 public class SvgDrawer {
 
 	int numSvgs = 0;
-	int svgFileLimit = 5000;
-	boolean splitSVG = false;
+	int svgFileLimit = 2000;
+	boolean splitSVG = true;
 	PrintWriter writer;
 	private int svgFileCount = 1;
 	private String opDir = "";
@@ -19,6 +19,8 @@ public class SvgDrawer {
 	private double w = 0;
 	private double h = 0;
 	public ArrayList<ScratchArc> allScratches = new ArrayList<ScratchArc>();
+	boolean square;
+	boolean circle;
 
 	public SvgDrawer(String opDir, String src, double w, double h) {
 		this.opDir = opDir;
@@ -56,17 +58,21 @@ public class SvgDrawer {
 		sb.append(addArc(xc, yc, rad, angSt, angEn));
 		// double ang = ((angSt + angEn) / 2) % 360;
 		// String col = ang >= 180 ? "red" : "blue";
+		writeToSVG(sb);
+		split();
+		System.out.println("numSvgs = " + numSvgs);
+	}
+
+	private void split() {
 		if (splitSVG) {
 			if (numSvgs % svgFileLimit == 0) {
 				if (numSvgs != 0) {
 					endSVG();
 					svgFileCount++;
 				}
-				startSVG(true, false);
+				startSVG(square, circle);
 			}
 		}
-		writeToSVG(sb);
-		System.out.println("numSvgs = " + numSvgs);
 	}
 
 	void writeToSVG(StringBuffer sb) {
@@ -77,11 +83,14 @@ public class SvgDrawer {
 	void writeToSVG(String s) {
 		numSvgs++;
 		writer.println(s);
+		split();
 	}
 
 	void startSVG(boolean square, boolean circle) {
+		this.square = square;
+		this.circle = circle;
 		if (splitSVG) {
-			return;
+			// return;
 		}
 		try {
 			writer = new PrintWriter(opDir + src + "_" + svgFileCount + ".svg", "UTF-8");
@@ -106,7 +115,8 @@ public class SvgDrawer {
 			writer.println("M" + rad + " " + rad + " L" + dd + " " + rad + " L" + dd + " " + dd + " L" + rad + " " + dd
 					+ " Z");
 		} else if (circle) {
-			addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.95 / 2));
+			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.95 / 2)));
+			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.1)));
 		}
 
 	}

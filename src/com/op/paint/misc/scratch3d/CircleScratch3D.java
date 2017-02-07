@@ -46,7 +46,7 @@ public class CircleScratch3D {
 	VertexTransformer vertexTransformer;
 
 	private int totRotAng = 360;
-	private double incRotAng = 6;
+	private double incRotAng = 30; // 6;
 	private double arcAngHalf = 10;
 
 	private static CircleScratch3D scratch3D = new CircleScratch3D();
@@ -71,10 +71,10 @@ public class CircleScratch3D {
 		svgDrawer.writeToSVG(sd1);
 		String sd2 = svgDrawer.addLine(cx - 10, cy + 10, cx + 10, cy - 10);
 		svgDrawer.writeToSVG(sd2);
-		String sd3 = svgDrawer.addCircle(cx, cy, w * 0.5);
-		svgDrawer.writeToSVG(sd3);
-		String sd4 = svgDrawer.addCircle(cx, cy, w * 0.1);
-		svgDrawer.writeToSVG(sd4);
+		// String sd3 = svgDrawer.addCircle(cx, cy, w * 0.5);
+		// svgDrawer.writeToSVG(sd3);
+		// String sd4 = svgDrawer.addCircle(cx, cy, w * 0.1);
+		// svgDrawer.writeToSVG(sd4);
 
 		for (VertexGeometric p : allPoints) {
 			for (double a = 0; a <= totRotAng; a = a + incRotAng) {
@@ -83,7 +83,7 @@ public class CircleScratch3D {
 			// break;
 		}
 
-		svgDrawer.drawAllScratches();
+		// svgDrawer.drawAllScratches();
 
 	}
 
