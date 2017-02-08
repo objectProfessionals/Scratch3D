@@ -11,10 +11,8 @@ import com.owens.oobjloader.builder.FaceVertex;
 import com.owens.oobjloader.builder.VertexGeometric;
 
 public class ObjLoader {
-	double vanishZ = 0;
 
-	public ObjLoader(double vanishZ) {
-		this.vanishZ = vanishZ;
+	public ObjLoader() {
 	}
 
 	public ArrayList<Face> loadOBJ(String dirAndFile, ArrayList<VertexGeometric> allPoints)
@@ -31,28 +29,6 @@ public class ObjLoader {
 		}
 		ArrayList<Face> originalFaces = obj0.builder.getFaces();
 		return originalFaces;
-	}
-
-	ArrayList<VertexGeometric> adjustPoints(ArrayList<VertexGeometric> points) {
-		ArrayList<VertexGeometric> points2 = new ArrayList<VertexGeometric>();
-		for (VertexGeometric p : points) {
-			VertexGeometric vg = adjustPoint(p);
-			points2.add(vg);
-		}
-		return points2;
-	}
-
-	VertexGeometric adjustPoint(VertexGeometric p) {
-		double sc = getScaleForAdjusts(p);
-		double x = p.x * sc;
-		double y = p.y * sc;
-		VertexGeometric vg = new VertexGeometric((float) x, (float) y, (float) p.z);
-		return vg;
-	}
-
-	double getScaleForAdjusts(VertexGeometric p) {
-		double sc = (vanishZ + p.z) / vanishZ;
-		return sc;
 	}
 
 	boolean isVertexVisible(ArrayList<Face> faces, VertexGeometric p) {

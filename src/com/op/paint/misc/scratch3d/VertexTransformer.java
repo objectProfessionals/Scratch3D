@@ -9,8 +9,10 @@ import com.owens.oobjloader.builder.VertexGeometric;
 public class VertexTransformer {
 
 	private ArrayList<Face> originalFaces;
+	double vanishZ = 0;
 
-	public VertexTransformer(ArrayList<Face> originalFaces) {
+	public VertexTransformer(ArrayList<Face> originalFaces, double vanishZ) {
+		this.vanishZ = vanishZ;
 		this.originalFaces = originalFaces;
 	}
 
@@ -48,9 +50,23 @@ public class VertexTransformer {
 		VertexGeometric vg = new VertexGeometric((float) x2, (float) y2, (float) z2);
 		VertexGeometric vga = vg;
 		if (adjustForPerspective) {
-			vga = objLoader.adjustPoint(vg);
+			vga = adjustPoint(vg);
 		}
 
 		return vga;
 	}
+
+	VertexGeometric adjustPoint(VertexGeometric p) {
+		double sc = getScaleForAdjusts(p);
+		double x = p.x * sc;
+		double y = p.y * sc;
+		VertexGeometric vg = new VertexGeometric((float) x, (float) y, (float) p.z);
+		return vg;
+	}
+
+	double getScaleForAdjusts(VertexGeometric p) {
+		double sc = (vanishZ + p.z) / vanishZ;
+		return sc;
+	}
+
 }

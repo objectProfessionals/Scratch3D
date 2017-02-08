@@ -51,9 +51,10 @@ public class ArcScratch3D {
 	private static ArcScratch3D scratch3D = new ArcScratch3D();
 
 	double vanZ = 10;
-	ObjLoader objLoader = new ObjLoader(vanZ);
+	ObjLoader objLoader = new ObjLoader();
 	SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h);
 	boolean savePNG = false;
+	private VertexTransformer vertexTransformer;
 
 	/**
 	 * @param args
@@ -72,6 +73,7 @@ public class ArcScratch3D {
 		init();
 		// allPoints = adjustPoints(allPoints);
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
+		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
 		drawAllPoints();
 		save();
@@ -87,7 +89,7 @@ public class ArcScratch3D {
 	}
 
 	private void drawArc(VertexGeometric p1, int c) {
-		VertexGeometric p = objLoader.adjustPoint(p1);
+		VertexGeometric p = vertexTransformer.adjustPoint(p1);
 		double x = p.x;
 		double y = p.y;
 		double z = p.z * 0.5;

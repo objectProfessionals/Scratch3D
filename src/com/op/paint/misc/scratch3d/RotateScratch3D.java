@@ -51,7 +51,7 @@ public class RotateScratch3D {
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
 	double vanZ = 5;
-	ObjLoader objLoader = new ObjLoader(vanZ);
+	ObjLoader objLoader = new ObjLoader();
 	SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h);
 	VertexTransformer vertexTransformer;
 
@@ -65,7 +65,7 @@ public class RotateScratch3D {
 		svgDrawer.startSVG(true, false);
 
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
-		vertexTransformer = new VertexTransformer(originalFaces);
+		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 		drawAllPoints();
 
 		save();

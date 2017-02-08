@@ -41,13 +41,13 @@ public class CircleScratch3D {
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
 	double vanZ = 3;
-	ObjLoader objLoader = new ObjLoader(vanZ);
+	ObjLoader objLoader = new ObjLoader();
 	SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h);
 	VertexTransformer vertexTransformer;
 
 	private int totRotAng = 360;
-	private double incRotAng = 30; // 6;
-	private double arcAngHalf = 10;
+	private double incRotAng = 10; // 6;
+	private double arcAngHalf = 5;
 
 	private static CircleScratch3D scratch3D = new CircleScratch3D();
 
@@ -59,7 +59,7 @@ public class CircleScratch3D {
 		svgDrawer.startSVG(false, true);
 
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
-		vertexTransformer = new VertexTransformer(originalFaces);
+		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
 		drawAllPoints();
 
@@ -76,8 +76,8 @@ public class CircleScratch3D {
 		// String sd4 = svgDrawer.addCircle(cx, cy, w * 0.1);
 		// svgDrawer.writeToSVG(sd4);
 
-		for (VertexGeometric p : allPoints) {
-			for (double a = 0; a <= totRotAng; a = a + incRotAng) {
+		for (double a = 0; a < totRotAng; a = a + incRotAng) {
+			for (VertexGeometric p : allPoints) {
 				drawPoint(p, a);
 			}
 			// break;
@@ -107,12 +107,13 @@ public class CircleScratch3D {
 
 		double xx = p2.x;
 		double yy = p2.y;
+		double zz = p2.z;
 
-		drawArc(xx, yy, p2.z, aDegs, true);
+		drawArc(xx, yy, zz, aDegs, true);
 		// drawPoint(xx, yy, p2.z, aDegs, true);
 	}
 
-	private void drawArc(double x, double y, float z, double aDegs, boolean b) {
+	private void drawArc(double x, double y, double z, double aDegs, boolean b) {
 		double sc = scaleMain * 0.2;
 
 		double xd = x * sc;
@@ -128,7 +129,7 @@ public class CircleScratch3D {
 		double xP2 = rad2 * Math.cos(a);
 		double yP2 = rad2 * Math.sin(a);
 
-		double zOff = 0.05;
+		double zOff = 0.1;
 		double rad = scaleMain * zOff + scaleMain * zOff * (Math.abs(z));
 
 		double aa = Math.toRadians(90 + aDegs);
@@ -136,10 +137,11 @@ public class CircleScratch3D {
 		double yc = rad * Math.sin(aa);
 
 		double xOff = cx + (xP2 + xc);
-		double yOff = cy - (yP2 - yc);
+		double yOff = cy + (yP2 + yc);
 
-		double a1 = 270 - aDegs - arcAngHalf;
-		double a2 = 270 - aDegs + arcAngHalf;
+		double offAng = 270;
+		double a1 = offAng + aDegs - arcAngHalf;
+		double a2 = offAng + aDegs + arcAngHalf;
 
 		String sb = svgDrawer.addArc(xOff, yOff, rad, a1, a2);
 		svgDrawer.writeToSVG(sb);

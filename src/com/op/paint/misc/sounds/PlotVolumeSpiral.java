@@ -23,7 +23,7 @@ public class PlotVolumeSpiral {
 	private static final String SPIRAL = "Spiral";
 	private static final String CIRCLE = "circle";
 	private static final String LINEAR = "linear";
-	private static final String typeName = SPIRAL;
+	private static final String typeName = SPIRAL_LINE;
 	private static final String scName = "ILoveYou20"; // "hello20";
 	private static final String opFileName = typeName + scName; // "hello20";
 	private String dir = "host/images/out/misc/scratch3d/";
@@ -36,8 +36,8 @@ public class PlotVolumeSpiral {
 	private double dpi = 300;
 	// private double dpi = 75;
 	private double mm2in = 25.4;
-	private double wmm = 270;
-	private double hmm = 270;
+	private double wmm = 100;
+	private double hmm = 100;
 	private int w = (int) (dpi * (wmm / mm2in));
 	private int h = (int) (dpi * (hmm / mm2in));
 	private boolean addBorder = true;
@@ -72,7 +72,7 @@ public class PlotVolumeSpiral {
 		Font newFont = currentFont.deriveFont(currentFont.getSize() * fontSize);
 		opG.setFont(newFont);
 
-		String src = dir;
+		String src = opDir;
 
 		writer = new PrintWriter(src + "SPIRAL.svg", "UTF-8");
 		writer.println("<svg width=\"" + w + "\" height=\"" + h + "\" xmlns=\"http://www.w3.org/2000/svg\">");
@@ -83,7 +83,7 @@ public class PlotVolumeSpiral {
 
 	private void createWavData() {
 		System.out.println("reading " + scName);
-		String src = dir;
+		String src = opDir;
 		reader = new WaveFileReader(src + scName + ".wav");
 		for (int i = 0; i < reader.getData()[0].length; i++) {
 			double r = reader.getData()[0][i];
@@ -173,8 +173,8 @@ public class PlotVolumeSpiral {
 			if (Math.abs(yy) > 0.5) {
 				drawLine(xx1, yy1, xx2, yy2);
 			}
-			drawCut(xx1, yy1, true);
-			drawCut(xx2, yy2, false);
+			drawSpiralCut(xx1, yy1, true);
+			drawSpiralCut(xx2, yy2, false);
 
 			double cir = 2 * Math.PI * rs;
 			double fr = (360.0 / cir);
@@ -209,7 +209,7 @@ public class PlotVolumeSpiral {
 		System.out.println(x + ":" + y);
 	}
 
-	private void drawCut(double x1, double y1, boolean inner) {
+	private void drawSpiralCut(double x1, double y1, boolean inner) {
 		double xx = new BigDecimal(x1).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 		double yy = new BigDecimal(y1).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 		if (inner) {
@@ -240,9 +240,9 @@ public class PlotVolumeSpiral {
 		int x = 0;
 		int xc = w / 2;
 		int yc = h / 2;
-		double frr = 1.5;
-		int radsep = 50;
-		double rs = 1000;
+		double frr = 0.15;
+		int radsep = 10;
+		double rs = 50;
 		double re = rs + radsep;
 		double ang = 0;
 
@@ -255,6 +255,7 @@ public class PlotVolumeSpiral {
 		opG.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
 
 		ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
+		ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
 		int ms = 0;
 		for (int i = 0; i < ps.size(); i = i + 1) {
 			Point2D p1 = ps.get(i);
@@ -266,17 +267,30 @@ public class PlotVolumeSpiral {
 			double angDeg = Math.toRadians(ang);
 			double xs = xc + Math.cos(angDeg) * rs;
 			double x1 = xc + Math.cos(angDeg) * (rs - (rF / 2.0));
+			double x2 = xc + Math.cos(angDeg) * (rs + (rF / 2.0));
 			double xe = xc + Math.cos(angDeg) * re;
 
 			double ys = yc + Math.sin(angDeg) * rs;
 			double y1 = xc + Math.sin(angDeg) * (rs - (rF / 2.0));
+			double y2 = yc + Math.sin(angDeg) * (rs + (rF / 2.0));
 			double ye = yc + Math.sin(angDeg) * re;
 
 			in.add(new Point2D.Double(x1, y1));
+			out.add(new Point2D.Double(x2, y2));
 
 			if (ms == 799) {
 				opG.drawLine((int) xs, (int) ys, (int) xe, (int) ye);
 			}
+
+			drawSpiralLineCut(i, x1, y1);
+
+			double rrr = radsep / 2;
+			double xx1 = xc + Math.cos(angDeg) * (rs - rrr);
+			double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
+			double yy1 = xc + Math.sin(angDeg) * (rs - rrr);
+			double yy2 = xc + Math.sin(angDeg) * (rs + rrr);
+			drawSpiralCut(xx1, yy1, true);
+			drawSpiralCut(xx2, yy2, false);
 
 			double cir = 2 * Math.PI * rs;
 			double fr = (360.0 / cir);
@@ -305,6 +319,16 @@ public class PlotVolumeSpiral {
 		opG.setColor(Color.RED);
 		opG.drawOval(0, 0, w, h);
 		System.out.println(x + ":" + y);
+	}
+
+	private void drawSpiralLineCut(int i, double x1, double y1) {
+		if (i == 0) {
+			String sb = "M " + x1 + " " + y1;
+			writer.println(sb);
+		} else {
+			String sb = " L " + x1 + " " + y1 + " ";
+			writer.println(sb);
+		}
 	}
 
 	private void drawAsCircle(ArrayList<Point2D> ps) {
@@ -501,7 +525,7 @@ public class PlotVolumeSpiral {
 			opImage3 = opImage2;
 		}
 		System.out.println("Saving...");
-		String src = dir;
+		String src = opDir;
 		File fFile1 = new File(src + opFileName + outFileExt);
 		if (outFileExt.equals(".png")) {
 			RendererUtils.savePNGFile(opImage3, fFile1, dpi);

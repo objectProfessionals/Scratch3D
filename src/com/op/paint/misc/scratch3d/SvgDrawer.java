@@ -11,7 +11,7 @@ public class SvgDrawer {
 
 	int numSvgs = 0;
 	int svgFileLimit = 2000;
-	boolean splitSVG = true;
+	boolean splitSVG = false;
 	PrintWriter writer;
 	private int svgFileCount = 1;
 	private String opDir = "";
