@@ -13,10 +13,11 @@ public class CircleScratch3D {
 	private String objDir = "objFiles/";
 	// private String obj = "tie";
 	// private String obj = "cubeHiSq";
-	// private String obj = "coneLow";
+	// private String obj = "Heart";
 	// private String obj = "cubeHiEdges";
 	// private String obj = "cubeLow";
-	private String obj = "cubeLowWithEdges";
+	// private String obj = "cubeLowWithEdges";
+	private String obj = "cubeEdgeCut";
 	// private String obj = "coneLowWithEdges";
 	// private String obj = "sphereMed";
 	// private String obj = "DeathStarLow";
@@ -40,14 +41,14 @@ public class CircleScratch3D {
 
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
-	double vanZ = 3;
+	double vanZ = 5;
 	ObjLoader objLoader = new ObjLoader();
 	SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h);
 	VertexTransformer vertexTransformer;
 
 	private int totRotAng = 360;
-	private double incRotAng = 10; // 6;
-	private double arcAngHalf = 5;
+	private double incRotAng = 7.5; // 6;
+	private double arcAngHalf = 15;
 
 	private static CircleScratch3D scratch3D = new CircleScratch3D();
 
@@ -80,6 +81,7 @@ public class CircleScratch3D {
 			for (VertexGeometric p : allPoints) {
 				drawPoint(p, a);
 			}
+			// if (a > 60)
 			// break;
 		}
 
@@ -91,7 +93,7 @@ public class CircleScratch3D {
 		VertexGeometric p2 = p1;
 		boolean adjustForPerspective = false;
 		boolean occlude = false;
-		p2 = vertexTransformer.transformVertex(p1, -aDegs, adjustForPerspective, objLoader);
+		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective, objLoader);
 		if (occlude) {
 			ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective, objLoader);
 			if (!objLoader.isVertexVisible(faces, p2)) {
@@ -109,11 +111,11 @@ public class CircleScratch3D {
 		double yy = p2.y;
 		double zz = p2.z;
 
-		drawArc(xx, yy, zz, aDegs, true);
+		drawArc(xx, yy, zz, aDegs, p2);
 		// drawPoint(xx, yy, p2.z, aDegs, true);
 	}
 
-	private void drawArc(double x, double y, double z, double aDegs, boolean b) {
+	private void drawArc(double x, double y, double z, double aDegs, VertexGeometric p) {
 		double sc = scaleMain * 0.2;
 
 		double xd = x * sc;
@@ -129,19 +131,19 @@ public class CircleScratch3D {
 		double xP2 = rad2 * Math.cos(a);
 		double yP2 = rad2 * Math.sin(a);
 
-		double zOff = 0.1;
-		double rad = scaleMain * zOff + scaleMain * zOff * (Math.abs(z));
+		double zOff = 0.05;
+		double rad = scaleMain * zOff + Math.abs(scaleMain * zOff * (z));
 
-		double aa = Math.toRadians(90 + aDegs);
+		double offAng = z > 0 ? 90 : 270;
+		double aa = Math.toRadians(offAng + aDegs);
 		double xc = rad * Math.cos(aa);
 		double yc = rad * Math.sin(aa);
 
-		double xOff = cx + (xP2 + xc);
-		double yOff = cy + (yP2 + yc);
+		double xOff = cx - (xP2 + xc);
+		double yOff = cy - (yP2 + yc);
 
-		double offAng = 270;
-		double a1 = offAng + aDegs - arcAngHalf;
-		double a2 = offAng + aDegs + arcAngHalf;
+		double a1 = offAng + aDegs + arcAngHalf;
+		double a2 = offAng + aDegs - arcAngHalf;
 
 		String sb = svgDrawer.addArc(xOff, yOff, rad, a1, a2);
 		svgDrawer.writeToSVG(sb);

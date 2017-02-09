@@ -241,7 +241,7 @@ public class PlotVolumeSpiral {
 		int xc = w / 2;
 		int yc = h / 2;
 		double frr = 0.15;
-		int radsep = 10;
+		int radsep = 5;
 		double rs = 50;
 		double re = rs + radsep;
 		double ang = 0;
@@ -284,7 +284,7 @@ public class PlotVolumeSpiral {
 
 			drawSpiralLineCut(i, x1, y1);
 
-			double rrr = radsep / 2;
+			double rrr = radsep * 2;
 			double xx1 = xc + Math.cos(angDeg) * (rs - rrr);
 			double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
 			double yy1 = xc + Math.sin(angDeg) * (rs - rrr);

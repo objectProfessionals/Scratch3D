@@ -1,6 +1,7 @@
 package com.op.paint.misc.scratch3d;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +61,8 @@ public class ObjLoader {
 		}
 		path.closePath();
 
-		return path.contains(p.x, p.y);
+		Point2D pp = new Point2D.Double(p.x, p.y);
+		return path.contains(pp);
 	}
 
 	private ArrayList<Face> getAllFacesWithLargerZ(ArrayList<Face> all, VertexGeometric p) {
@@ -70,6 +72,7 @@ public class ObjLoader {
 			for (FaceVertex fv : face.vertices) {
 				if (fv.v.z > p.z) {
 					toAdd = true;
+					break;
 				}
 			}
 			if (toAdd) {
@@ -85,7 +88,9 @@ public class ObjLoader {
 			boolean toAdd = true;
 			for (FaceVertex fv : face.vertices) {
 				if (equals(fv.v, p)) {
+					// if (fv.v.equals(p)) {
 					toAdd = false;
+					break;
 				}
 			}
 			if (toAdd) {
@@ -100,7 +105,7 @@ public class ObjLoader {
 	}
 
 	private boolean equals(float x, float x2) {
-		return (x - x2) < 0.001;
+		return (x - x2) < 0.0001;
 	}
 
 }
