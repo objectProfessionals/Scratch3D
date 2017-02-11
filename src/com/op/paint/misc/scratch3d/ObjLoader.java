@@ -61,7 +61,7 @@ public class ObjLoader {
 		}
 		path.closePath();
 
-		Point2D pp = new Point2D.Double(p.x, p.y);
+		Point2D pp = new Point2D.Double(p.x * 0.999, p.y * 0.999);
 		return path.contains(pp);
 	}
 
@@ -105,7 +105,7 @@ public class ObjLoader {
 	}
 
 	private boolean equals(float x, float x2) {
-		return (x - x2) < 0.0001;
+		return Math.abs(x - x2) < 0.0001;
 	}
 
 }

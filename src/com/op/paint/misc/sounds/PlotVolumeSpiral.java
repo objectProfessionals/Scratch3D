@@ -241,9 +241,10 @@ public class PlotVolumeSpiral {
 		int xc = w / 2;
 		int yc = h / 2;
 		double frr = 0.15;
+		double afr = 0.01;
 		int radsep = 5;
-		double rs = 50;
-		double re = rs + radsep;
+		double rs = 100;
+		double re = rs + radsep + 50;
 		double ang = 0;
 
 		int rr = 10;
@@ -284,7 +285,7 @@ public class PlotVolumeSpiral {
 
 			drawSpiralLineCut(i, x1, y1);
 
-			double rrr = radsep * 2;
+			double rrr = radsep * 4;
 			double xx1 = xc + Math.cos(angDeg) * (rs - rrr);
 			double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
 			double yy1 = xc + Math.sin(angDeg) * (rs - rrr);
@@ -294,7 +295,7 @@ public class PlotVolumeSpiral {
 
 			double cir = 2 * Math.PI * rs;
 			double fr = (360.0 / cir);
-			ang = ang + fr + 0.25;
+			ang = ang + fr + afr;
 
 			System.out.println("ang=" + ang);
 			// frr = frr + 0.0001;
@@ -537,10 +538,12 @@ public class PlotVolumeSpiral {
 
 		writer.println("\" stroke=\"blue\" fill=\"none\" />");
 
-		writer.print(cut);
+		writer.print(cut.substring(0, cut.length() - 4));
 		writer.println("\" stroke=\"red\" fill=\"none\" />");
-		writer.print(cutO);
+
+		writer.print(cutO.substring(0, cutO.length() - 4));
 		writer.println("\" stroke=\"red\" fill=\"none\" />");
+
 		writer.println("</svg>");
 		writer.close();
 	}

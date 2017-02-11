@@ -115,7 +115,7 @@ public class SvgDrawer {
 			writer.println("M" + rad + " " + rad + " L" + dd + " " + rad + " L" + dd + " " + dd + " L" + rad + " " + dd
 					+ " Z");
 		} else if (circle) {
-			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.95 / 2)));
+			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.5)));
 			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.1)));
 		}
 

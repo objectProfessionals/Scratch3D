@@ -16,11 +16,11 @@ public class CircleScratch3D {
 	// private String obj = "Heart";
 	// private String obj = "cubeHiEdges";
 	// private String obj = "cubeLow";
-	// private String obj = "cubeLowWithEdges";
-	private String obj = "cubeEdgeCut";
+	private String obj = "cubeLowWithEdges";
+	// private String obj = "cubeTris";
 	// private String obj = "coneLowWithEdges";
 	// private String obj = "sphereMed";
-	// private String obj = "DeathStarLow";
+	// private String obj = "DeathStar";
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
@@ -47,7 +47,7 @@ public class CircleScratch3D {
 	VertexTransformer vertexTransformer;
 
 	private int totRotAng = 360;
-	private double incRotAng = 7.5; // 6;
+	private double incRotAng = 15; // 6;
 	private double arcAngHalf = 15;
 
 	private static CircleScratch3D scratch3D = new CircleScratch3D();
@@ -92,10 +92,10 @@ public class CircleScratch3D {
 	private void drawPoint(VertexGeometric p1, double aDegs) {
 		VertexGeometric p2 = p1;
 		boolean adjustForPerspective = false;
-		boolean occlude = false;
-		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective, objLoader);
+		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective);
+		boolean occlude = true;
 		if (occlude) {
-			ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective, objLoader);
+			ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective);
 			if (!objLoader.isVertexVisible(faces, p2)) {
 				return;
 			}
@@ -116,12 +116,12 @@ public class CircleScratch3D {
 	}
 
 	private void drawArc(double x, double y, double z, double aDegs, VertexGeometric p) {
-		double sc = scaleMain * 0.2;
+		double sc = scaleMain * 0.4;
 
 		double xd = x * sc;
 		double yd = y * sc;
 
-		double radToC = scaleMain * 1;
+		double radToC = scaleMain * 1.0;
 		double x2 = xd;
 		double y2 = radToC + yd;
 		double rad2 = Math.sqrt(x2 * x2 + y2 * y2);

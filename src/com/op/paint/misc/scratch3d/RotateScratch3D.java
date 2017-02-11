@@ -105,8 +105,8 @@ public class RotateScratch3D {
 		boolean adjustForPerspective = true;
 		boolean occlude = false;
 		VertexGeometric p2 = p1;
-		ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective, objLoader);
-		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective, objLoader);
+		ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective);
+		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective);
 
 		if (occlude) {
 			if (!objLoader.isVertexVisible(faces, p2)) {

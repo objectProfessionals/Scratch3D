@@ -16,14 +16,14 @@ public class VertexTransformer {
 		this.originalFaces = originalFaces;
 	}
 
-	ArrayList<Face> getTransformedFaces(double aDegs, boolean adjustForPerspective, ObjLoader objLoader) {
+	ArrayList<Face> getTransformedFaces(double aDegs, boolean adjustForPerspective) {
 		ArrayList<Face> tr = new ArrayList<Face>();
 		for (Face face : originalFaces) {
 			Face newFace = new Face();
 			for (FaceVertex fv : face.vertices) {
 				FaceVertex fv2 = new FaceVertex();
 				VertexGeometric vg = new VertexGeometric(fv.v.x, fv.v.y, fv.v.z);
-				fv2.v = transformVertex(vg, aDegs, adjustForPerspective, objLoader);
+				fv2.v = transformVertex(vg, aDegs, adjustForPerspective);
 				newFace.vertices.add(fv2);
 			}
 			tr.add(newFace);
@@ -31,8 +31,7 @@ public class VertexTransformer {
 		return tr;
 	}
 
-	VertexGeometric transformVertex(VertexGeometric p1, double aDegs, boolean adjustForPerspective,
-			ObjLoader objLoader) {
+	VertexGeometric transformVertex(VertexGeometric p1, double aDegs, boolean adjustForPerspective) {
 		double aa = Math.toRadians(aDegs);
 		double x = p1.x;
 		double y = p1.y;
@@ -50,21 +49,22 @@ public class VertexTransformer {
 		VertexGeometric vg = new VertexGeometric((float) x2, (float) y2, (float) z2);
 		VertexGeometric vga = vg;
 		if (adjustForPerspective) {
-			vga = adjustPoint(vg);
+			vga = adjustPointForPerspective(vg);
 		}
 
 		return vga;
 	}
 
-	VertexGeometric adjustPoint(VertexGeometric p) {
-		double sc = getScaleForAdjusts(p);
+	VertexGeometric adjustPointForPerspective(VertexGeometric p) {
+		double sc = getScaleForPerspectiveAdjusts(p);
 		double x = p.x * sc;
 		double y = p.y * sc;
 		VertexGeometric vg = new VertexGeometric((float) x, (float) y, (float) p.z);
+		vg.defs = p.defs;
 		return vg;
 	}
 
-	double getScaleForAdjusts(VertexGeometric p) {
+	double getScaleForPerspectiveAdjusts(VertexGeometric p) {
 		double sc = (vanishZ + p.z) / vanishZ;
 		return sc;
 	}
