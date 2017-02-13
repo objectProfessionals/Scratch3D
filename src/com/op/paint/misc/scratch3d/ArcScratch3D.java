@@ -114,7 +114,7 @@ public class ArcScratch3D {
 				if (vg.defs == null) {
 					vg.defs = new ArcScratchDefs();
 					vg.defs.cx = xx;
-					vg.defs.cy = z < 0 ? yy - rad : yy + rad;
+					vg.defs.cy = z < 0 ? -rad : rad;
 					vg.defs.r = rad;
 					vg.defs.startPosAng = z < 0 ? 90 : 270;
 				}
@@ -174,14 +174,17 @@ public class ArcScratch3D {
 				for (int i = 0; i < arcs.size(); i++) {
 					boolean arcOnOff = arcs.get(i);
 					if (i == arcs.size() - 1 && startedArc) {
-						svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, startPosAng + stAng, startPosAng + enAng);
+						double s = startPosAng + stAng;
+						double e = startPosAng + enAng;
+						svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, s, e);
 					}
 
 					if (!started) {
 						if (!arcOnOff) {
 							if (startedArc) {
-								svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, startPosAng + stAng,
-										startPosAng + enAng);
+								double s = startPosAng + stAng;
+								double e = startPosAng + enAng;
+								svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, s, e);
 								stAng = enAng + angInc;
 								enAng = enAng + angInc;
 								startedArc = false;
