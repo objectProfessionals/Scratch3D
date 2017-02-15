@@ -146,7 +146,7 @@ public class SvgDrawer {
 		VertexGeometric start = polarToCartesian(cx, cy, radius, startAngle);
 		VertexGeometric end = polarToCartesian(cx, cy, radius, endAngle);
 
-		String largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+		String largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
 
 		String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radius) + " " + formatD(radius)
 				+ " 0" + " " + largeArcFlag + " " + "0" + " " + formatD(end.x) + " " + formatD(end.y);

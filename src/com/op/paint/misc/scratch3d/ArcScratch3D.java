@@ -23,11 +23,11 @@ public class ArcScratch3D {
 	private String objDir = "objFiles/";
 
 	// private String obj = "tieMini";
-	private String obj = "cubeLow";
+	// private String obj = "cubeLow";
 	// private String obj = "cubeEdgeCut";
 	// private String obj = "cubeLowWithEdges";
 	// private String obj = "cubeHiStraight";
-	// private String obj = "DeathStar";
+	private String obj = "DeathStar";
 	// private String obj = "coneHi";
 	// private String obj = "sphereMed";
 	// private String obj = "DeathStarFront";
@@ -98,7 +98,8 @@ public class ArcScratch3D {
 	}
 
 	public void drawTransformedFacesForArc(boolean adjustForPerspective) {
-		double sf = 0.5;
+		double sf = 1;
+		double sfz = 1;
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
 				VertexGeometric vg = fv.v;
@@ -106,17 +107,16 @@ public class ArcScratch3D {
 
 				double x = vg.x;
 				double y = vg.y;
-				double z = vg.z * 0.5;
-				double rad = sf * scaleMain * (Math.abs(z));
-				double xx = x * scaleMain * sf;
-				double yy = y * scaleMain * sf;
+				double z = vg.z;
+				double rad = sfz * (Math.abs(z));
 
 				if (vg.defs == null) {
 					vg.defs = new ArcScratchDefs();
-					vg.defs.cx = xx;
-					vg.defs.cy = z < 0 ? -rad : rad;
+					vg.defs.cx = x;
+					// outward = 270 = '-'
+					vg.defs.cy = z > 0 ? y + rad : y - rad;
 					vg.defs.r = rad;
-					vg.defs.startPosAng = z < 0 ? 90 : 270;
+					vg.defs.startPosAng = z > 0 ? 270 : 90;
 				}
 			}
 		}
@@ -158,12 +158,21 @@ public class ArcScratch3D {
 		} // all angs
 
 		double st = -ang / 2;
+		double ss = scaleMain * sf;
+		double s2 = scaleMain * sf;
+		ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
 				VertexGeometric vg = fv.v;
-				double xc = vg.defs.cx;
-				double yc = vg.defs.cy;
-				double r = vg.defs.r;
+				if (used.contains(vg)) {
+					continue;
+				}
+				used.add(vg);
+
+				double r = vg.defs.r * s2;
+				double xc = vg.defs.cx * ss;
+				double yc = vg.defs.cy * ss;
+				double z = vg.z;
 				double startPosAng = vg.defs.startPosAng;
 
 				ArrayList<Boolean> arcs = vg.defs.arcs;
@@ -174,17 +183,13 @@ public class ArcScratch3D {
 				for (int i = 0; i < arcs.size(); i++) {
 					boolean arcOnOff = arcs.get(i);
 					if (i == arcs.size() - 1 && startedArc) {
-						double s = startPosAng + stAng;
-						double e = startPosAng + enAng;
-						svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, s, e);
+						drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
 					}
 
 					if (!started) {
 						if (!arcOnOff) {
 							if (startedArc) {
-								double s = startPosAng + stAng;
-								double e = startPosAng + enAng;
-								svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, s, e);
+								drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
 								stAng = enAng + angInc;
 								enAng = enAng + angInc;
 								startedArc = false;
@@ -208,6 +213,15 @@ public class ArcScratch3D {
 			}
 		}
 
+	}
+
+	private void drawSVGSrc(VertexGeometric vg, double r, double xc, double yc, double z, double startPosAng,
+			double stAng, double enAng) {
+		double g = 180;
+		double y = -yc;
+		double s = (startPosAng - stAng) + g;
+		double e = (startPosAng - enAng) + g;
+		svgDescriber.drawAndAddArc(cx + xc, cy + y, r, s, e);
 	}
 
 	private void drawArc(VertexGeometric p1, int c) {
