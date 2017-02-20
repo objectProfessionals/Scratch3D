@@ -40,6 +40,8 @@ public class PlotVolumeSpiral {
 	private double hmm = 100;
 	private int w = (int) (dpi * (wmm / mm2in));
 	private int h = (int) (dpi * (hmm / mm2in));
+	private int cx = w / 2;
+	private int cy = h / 2;
 	private boolean addBorder = true;
 	private double bordermm = 20;
 	private double border = (dpi * (bordermm / mm2in));
@@ -240,11 +242,15 @@ public class PlotVolumeSpiral {
 		int x = 0;
 		int xc = w / 2;
 		int yc = h / 2;
-		double frr = 0.15;
-		double afr = 0.01;
-		int radsep = 5;
-		double rs = 100;
-		double re = rs + radsep + 50;
+		double frr = -0.05;
+		double afr = -0.024;
+		double amplHeightmm = 0.5;
+		double amplHeight = (dpi * (amplHeightmm / mm2in));
+		double rsmm = 45;
+		double rimm = 0;
+		double rs = (dpi * (rsmm / mm2in));
+		double ri = (dpi * (rimm / mm2in));
+		double re = rs + amplHeight + ri;
 		double ang = 0;
 
 		int rr = 10;
@@ -257,12 +263,19 @@ public class PlotVolumeSpiral {
 
 		ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
 		ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
+
+		int cr = 10;
+		String sd1 = addLine(cx - cr, cy - cr, cx + cr, cy + cr);
+		writer.println(sd1);
+		String sd2 = addLine(cx - cr, cy + cr, cx + cr, cy - cr);
+		writer.println(sd2);
+
 		int ms = 0;
 		for (int i = 0; i < ps.size(); i = i + 1) {
 			Point2D p1 = ps.get(i);
 			double vol = p1.getY();
 			double yy = (-min + vol) / (max - min);
-			double rF = (0.5 - yy) * radsep;
+			double rF = (0.5 - yy) * amplHeight;
 			// double rF = yy * radsep;
 
 			double angDeg = Math.toRadians(ang);
@@ -285,13 +298,13 @@ public class PlotVolumeSpiral {
 
 			drawSpiralLineCut(i, x1, y1);
 
-			double rrr = radsep * 4;
+			double rrr = amplHeight * 4;
 			double xx1 = xc + Math.cos(angDeg) * (rs - rrr);
 			double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
 			double yy1 = xc + Math.sin(angDeg) * (rs - rrr);
 			double yy2 = xc + Math.sin(angDeg) * (rs + rrr);
-			drawSpiralCut(xx1, yy1, true);
-			drawSpiralCut(xx2, yy2, false);
+			// drawSpiralCut(xx1, yy1, true);
+			// drawSpiralCut(xx2, yy2, false);
 
 			double cir = 2 * Math.PI * rs;
 			double fr = (360.0 / cir);
@@ -303,6 +316,8 @@ public class PlotVolumeSpiral {
 			re = re + fr * frr;
 			ms = (ms + 1) % 800;
 		}
+
+		// writer.println(" Z ");
 
 		Path2D path = new Path2D.Double();
 		for (Point2D.Double p : in) {
@@ -320,6 +335,11 @@ public class PlotVolumeSpiral {
 		opG.setColor(Color.RED);
 		opG.drawOval(0, 0, w, h);
 		System.out.println(x + ":" + y);
+	}
+
+	String addLine(double x1, double y1, double x2, double y2) {
+		String d = "M" + x1 + " " + y1 + " L " + x2 + " " + y2 + " ";
+		return d;
 	}
 
 	private void drawSpiralLineCut(int i, double x1, double y1) {
@@ -538,11 +558,11 @@ public class PlotVolumeSpiral {
 
 		writer.println("\" stroke=\"blue\" fill=\"none\" />");
 
-		writer.print(cut.substring(0, cut.length() - 4));
-		writer.println("\" stroke=\"red\" fill=\"none\" />");
-
-		writer.print(cutO.substring(0, cutO.length() - 4));
-		writer.println("\" stroke=\"red\" fill=\"none\" />");
+		// writer.print(cut.substring(0, cut.length() - 4));
+		// writer.println("\" stroke=\"red\" fill=\"none\" />");
+		//
+		// writer.print(cutO.substring(0, cutO.length() - 4));
+		// writer.println("\" stroke=\"red\" fill=\"none\" />");
 
 		writer.println("</svg>");
 		writer.close();

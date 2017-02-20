@@ -72,8 +72,12 @@ public class Build implements BuilderInterface {
 
 	public void addVertexTexture(float u, float v) {
 		verticesT.add(new VertexTexture(u, v));
-		// log.log(INFO,"Added texture  vertex " + verticesT.size() + " = " +
+		// log.log(INFO,"Added texture vertex " + verticesT.size() + " = " +
 		// verticesT.get(verticesT.size() - 1));
+	}
+
+	public HashMap<String, ArrayList<Face>> getGroups() {
+		return groups;
 	}
 
 	public ArrayList<VertexGeometric> getVertices() {
@@ -89,13 +93,11 @@ public class Build implements BuilderInterface {
 	}
 
 	public void addPoints(int[] values) {
-		log.log(INFO, "@TODO: Got " + values.length
-				+ " points in builder, ignoring");
+		log.log(INFO, "@TODO: Got " + values.length + " points in builder, ignoring");
 	}
 
 	public void addLine(int[] values) {
-		log.log(INFO, "@TODO: Got a line of " + values.length
-				+ " segments in builder, ignoring");
+		log.log(INFO, "@TODO: Got a line of " + values.length + " segments in builder, ignoring");
 	}
 
 	public void addFace(int[] vertexIndices) {
@@ -126,17 +128,15 @@ public class Build implements BuilderInterface {
 			if (vertexIndex < 0) {
 				vertexIndex = vertexIndex + verticesG.size();
 			}
-			if (((vertexIndex - 1) >= 0)
-					&& ((vertexIndex - 1) < verticesG.size())) {
+			if (((vertexIndex - 1) >= 0) && ((vertexIndex - 1) < verticesG.size())) {
 				// Note: vertex indices are 1-indexed, i.e. they start at
 				// one, so we offset by -1 for the 0-indexed array lists.
 				fv.v = verticesG.get(vertexIndex - 1);
 			} else {
 				log.log(SEVERE,
-						"Index for geometric vertex="
-								+ vertexIndex
-								+ " is out of the current range of geometric vertex values 1 to "
-								+ verticesG.size() + ", ignoring");
+						"Index for geometric vertex=" + vertexIndex
+								+ " is out of the current range of geometric vertex values 1 to " + verticesG.size()
+								+ ", ignoring");
 			}
 
 			vertexIndex = vertexIndices[loopi++];
@@ -149,17 +149,15 @@ public class Build implements BuilderInterface {
 					// "the 5th vertice before now"
 					vertexIndex = vertexIndex + verticesT.size();
 				}
-				if (((vertexIndex - 1) >= 0)
-						&& ((vertexIndex - 1) < verticesT.size())) {
+				if (((vertexIndex - 1) >= 0) && ((vertexIndex - 1) < verticesT.size())) {
 					// Note: vertex indices are 1-indexed, i.e. they start at
 					// one, so we offset by -1 for the 0-indexed array lists.
 					fv.t = verticesT.get(vertexIndex - 1);
 				} else {
 					log.log(SEVERE,
-							"Index for texture vertex="
-									+ vertexIndex
-									+ " is out of the current range of texture vertex values 1 to "
-									+ verticesT.size() + ", ignoring");
+							"Index for texture vertex=" + vertexIndex
+									+ " is out of the current range of texture vertex values 1 to " + verticesT.size()
+									+ ", ignoring");
 				}
 			}
 
@@ -173,23 +171,20 @@ public class Build implements BuilderInterface {
 					// "the 5th vertice before now"
 					vertexIndex = vertexIndex + verticesN.size();
 				}
-				if (((vertexIndex - 1) >= 0)
-						&& ((vertexIndex - 1) < verticesN.size())) {
+				if (((vertexIndex - 1) >= 0) && ((vertexIndex - 1) < verticesN.size())) {
 					// Note: vertex indices are 1-indexed, i.e. they start at
 					// one, so we offset by -1 for the 0-indexed array lists.
 					fv.n = verticesN.get(vertexIndex - 1);
 				} else {
 					log.log(SEVERE,
-							"Index for vertex normal="
-									+ vertexIndex
-									+ " is out of the current range of vertex normal values 1 to "
-									+ verticesN.size() + ", ignoring");
+							"Index for vertex normal=" + vertexIndex
+									+ " is out of the current range of vertex normal values 1 to " + verticesN.size()
+									+ ", ignoring");
 				}
 			}
 
 			if (fv.v == null) {
-				log.log(SEVERE,
-						"Can't add vertex to face with missing vertex!  Throwing away face.");
+				log.log(SEVERE, "Can't add vertex to face with missing vertex!  Throwing away face.");
 				faceErrorCount++;
 				return;
 			}
@@ -337,8 +332,7 @@ public class Build implements BuilderInterface {
 		}
 		if (null == smoothingGroups.get(currentSmoothingGroupNumber)) {
 			currentSmoothingGroup = new ArrayList<Face>();
-			smoothingGroups.put(currentSmoothingGroupNumber,
-					currentSmoothingGroup);
+			smoothingGroups.put(currentSmoothingGroupNumber, currentSmoothingGroup);
 		}
 	}
 
@@ -365,14 +359,12 @@ public class Build implements BuilderInterface {
 			return;
 		}
 		if (names.length == 1) {
-			log.log(INFO, "@TODO: Got a maplib line with one name=|" + names[0]
-					+ "|");
+			log.log(INFO, "@TODO: Got a maplib line with one name=|" + names[0] + "|");
 			return;
 		}
 		log.log(INFO, "@TODO: Got a maplib line;");
 		for (int loopi = 0; loopi < names.length; loopi++) {
-			log.log(INFO, "        names[" + loopi + "] = |" + names[loopi]
-					+ "|");
+			log.log(INFO, "        names[" + loopi + "] = |" + names[loopi] + "|");
 		}
 	}
 
@@ -428,7 +420,8 @@ public class Build implements BuilderInterface {
 	// material lib files in Parse.java in processMaterialLib()
 	// public void addMaterialLib(String[] names) {
 	// if (null == names) {
-	// log.log(INFO,"@TODO: Got a mtllib line with null names array - blank group line? (i.e. \"g\\n\" ?)");
+	// log.log(INFO,"@TODO: Got a mtllib line with null names array - blank
+	// group line? (i.e. \"g\\n\" ?)");
 	// return;
 	// }
 	// if (names.length == 1) {
@@ -438,7 +431,7 @@ public class Build implements BuilderInterface {
 	// }
 	// log.log(INFO,"@TODO: Got a mtllib line;");
 	// for (int loopi = 0; loopi < names.length; loopi++) {
-	// log.log(INFO,"        names[" + loopi + "] = |" + names[loopi] + "|");
+	// log.log(INFO," names[" + loopi + "] = |" + names[loopi] + "|");
 	// }
 	// }
 	public void newMtl(String name) {
@@ -553,12 +546,9 @@ public class Build implements BuilderInterface {
 
 	public void doneParsingObj(String filename) {
 		log.log(INFO,
-				"Loaded filename '" + filename + "' with " + verticesG.size()
-						+ " verticesG, " + verticesT.size() + " verticesT, "
-						+ verticesN.size() + " verticesN and " + faces.size()
-						+ " faces, of which " + faceTriCount + " triangles, "
-						+ faceQuadCount + " quads, and " + facePolyCount
-						+ " with more than 4 points, and faces with errors "
-						+ faceErrorCount);
+				"Loaded filename '" + filename + "' with " + verticesG.size() + " verticesG, " + verticesT.size()
+						+ " verticesT, " + verticesN.size() + " verticesN and " + faces.size() + " faces, of which "
+						+ faceTriCount + " triangles, " + faceQuadCount + " quads, and " + facePolyCount
+						+ " with more than 4 points, and faces with errors " + faceErrorCount);
 	}
 }

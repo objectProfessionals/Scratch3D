@@ -10,6 +10,7 @@ package com.op.paint.misc.scratch3d;
 // at http://unlicense.org/ .  See the file UNLICENSE in the repo.
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.owens.oobjloader.builder.Face;
 import com.owens.oobjloader.builder.VertexGeometric;
@@ -116,4 +117,7 @@ public interface BuilderInterface {
 	public ArrayList<VertexGeometric> getVertices();
 
 	public ArrayList<Face> getFaces();
+
+	public HashMap<String, ArrayList<Face>> getGroups();
+
 }

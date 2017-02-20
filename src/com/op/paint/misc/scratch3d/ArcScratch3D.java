@@ -25,12 +25,17 @@ public class ArcScratch3D {
 	// private String obj = "tieMini";
 	// private String obj = "cubeLow";
 	// private String obj = "cubeEdgeCut";
+	// private String obj = "cubeCuts";
+	// private String obj = "cubeHi";
+	// private String obj = "spheres";
 	// private String obj = "cubeLowWithEdges";
 	// private String obj = "cubeHiStraight";
-	private String obj = "DeathStar";
+	// private String obj = "DeathStar";
 	// private String obj = "coneHi";
 	// private String obj = "sphereMed";
-	// private String obj = "DeathStarFront";
+	private String obj = "cubeHole";
+	// private String obj = "sAndV";
+	// private String obj = "cubeHole2";
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
@@ -40,6 +45,7 @@ public class ArcScratch3D {
 	double mm2in = 25.4;
 	double scalemm = 30;
 	double scaleMain = dpi * (scalemm / mm2in);
+	double sf = 0.9;
 
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;
@@ -55,6 +61,7 @@ public class ArcScratch3D {
 
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
+	public HashMap<String, ArrayList<Face>> groups;
 
 	private static ArcScratch3D scratch3D = new ArcScratch3D();
 
@@ -83,6 +90,7 @@ public class ArcScratch3D {
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
+		groups = objLoader.groups;
 		drawAllPoints();
 		save();
 
@@ -98,17 +106,19 @@ public class ArcScratch3D {
 	}
 
 	public void drawTransformedFacesForArc(boolean adjustForPerspective) {
-		double sf = 1;
-		double sfz = 1;
+		double radf = 0.9;
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
 				VertexGeometric vg = fv.v;
 				// vg = vertexTransformer.adjustPointForPerspective(vg);
+				double sc = vertexTransformer.getScaleForPerspectiveAdjusts(vg);
+				double x = vg.x * sc;
+				double y = vg.y * sc;
 
-				double x = vg.x;
-				double y = vg.y;
+				// double x = vg.x;
+				// double y = vg.y;
 				double z = vg.z;
-				double rad = sfz * (Math.abs(z));
+				double rad = (1 - radf) + radf * (Math.abs(z));
 
 				if (vg.defs == null) {
 					vg.defs = new ArcScratchDefs();
@@ -157,9 +167,9 @@ public class ArcScratch3D {
 			}
 		} // all angs
 
+		boolean groupedOnly = true;
 		double st = -ang / 2;
 		double ss = scaleMain * sf;
-		double s2 = scaleMain * sf;
 		ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
@@ -167,9 +177,13 @@ public class ArcScratch3D {
 				if (used.contains(vg)) {
 					continue;
 				}
+				if (groupedOnly && !groups.get("Group").contains(face)) {
+					continue;
+				}
 				used.add(vg);
 
-				double r = vg.defs.r * s2;
+				double r = vg.defs.r * ss;
+				// r = 0.25 * ss + 0.75 * vg.defs.r * ss;
 				double xc = vg.defs.cx * ss;
 				double yc = vg.defs.cy * ss;
 				double z = vg.z;

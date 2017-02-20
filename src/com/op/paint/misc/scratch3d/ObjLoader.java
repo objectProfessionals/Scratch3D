@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.owens.oobjloader.builder.Build;
 import com.owens.oobjloader.builder.Face;
@@ -12,6 +13,8 @@ import com.owens.oobjloader.builder.FaceVertex;
 import com.owens.oobjloader.builder.VertexGeometric;
 
 public class ObjLoader {
+
+	public HashMap<String, ArrayList<Face>> groups;
 
 	public ObjLoader() {
 	}
@@ -21,6 +24,8 @@ public class ObjLoader {
 		Build builder = new Build();
 
 		Parse obj0 = new Parse(builder, dirAndFile + ".obj");
+		groups = obj0.builder.getGroups();
+
 		ArrayList<VertexGeometric> v0 = obj0.builder.getVertices();
 		for (VertexGeometric v : v0) {
 			// Point3f p = new Point3f(v.x, -v.z, v.y);
