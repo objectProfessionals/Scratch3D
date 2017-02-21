@@ -37,6 +37,23 @@ public class ObjLoader {
 		return originalFaces;
 	}
 
+	public ArrayList<VertexGeometric> loadOBJSelectedVerts(String dirAndFile)
+			throws FileNotFoundException, IOException {
+		Build builder = new Build();
+
+		Parse obj0 = new Parse(builder, dirAndFile + ".obj");
+
+		ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
+		ArrayList<VertexGeometric> v0 = obj0.builder.getVertices();
+		for (VertexGeometric v : v0) {
+			// Point3f p = new Point3f(v.x, -v.z, v.y);
+			VertexGeometric vg = new VertexGeometric(v.x, v.y, v.z);
+			allPoints.add(vg);
+
+		}
+		return allPoints;
+	}
+
 	boolean isVertexVisible(ArrayList<Face> faces, VertexGeometric p) {
 		ArrayList<Face> all = getAllNonJoiningFaces(faces, p);
 		ArrayList<Face> allFiltered = getAllFacesWithLargerZ(all, p);
@@ -105,7 +122,7 @@ public class ObjLoader {
 		return non;
 	}
 
-	private boolean equals(VertexGeometric v, VertexGeometric p) {
+	public boolean equals(VertexGeometric v, VertexGeometric p) {
 		return (equals(v.x, p.x)) && (equals(v.y, p.y)) && (equals(v.z, p.z));
 	}
 

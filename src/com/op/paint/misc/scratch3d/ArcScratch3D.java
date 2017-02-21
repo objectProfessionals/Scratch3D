@@ -45,7 +45,7 @@ public class ArcScratch3D {
 	double mm2in = 25.4;
 	double scalemm = 30;
 	double scaleMain = dpi * (scalemm / mm2in);
-	double sf = 0.9;
+	double sf = 0.8;
 
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;
@@ -61,6 +61,7 @@ public class ArcScratch3D {
 
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
+	ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
 	public HashMap<String, ArrayList<Face>> groups;
 
 	private static ArcScratch3D scratch3D = new ArcScratch3D();
@@ -89,6 +90,8 @@ public class ArcScratch3D {
 		// allPoints = adjustPoints(allPoints);
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
+
+		selectedVerts = objLoader.loadOBJSelectedVerts(dir + objDir + obj + "_sel");
 
 		groups = objLoader.groups;
 		drawAllPoints();
@@ -167,7 +170,7 @@ public class ArcScratch3D {
 			}
 		} // all angs
 
-		boolean groupedOnly = true;
+		boolean selectedOnly = true;
 		double st = -ang / 2;
 		double ss = scaleMain * sf;
 		ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
@@ -177,7 +180,7 @@ public class ArcScratch3D {
 				if (used.contains(vg)) {
 					continue;
 				}
-				if (groupedOnly && !groups.get("Group").contains(face)) {
+				if (selectedOnly && !selectedVertsContains(vg)) {
 					continue;
 				}
 				used.add(vg);
@@ -227,6 +230,15 @@ public class ArcScratch3D {
 			}
 		}
 
+	}
+
+	private boolean selectedVertsContains(VertexGeometric vg) {
+		for (VertexGeometric v : selectedVerts) {
+			if (objLoader.equals(vg, v)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void drawSVGSrc(VertexGeometric vg, double r, double xc, double yc, double z, double startPosAng,
