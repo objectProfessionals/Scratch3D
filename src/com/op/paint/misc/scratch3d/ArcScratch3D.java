@@ -22,7 +22,7 @@ public class ArcScratch3D {
 	private String opDir = "../output/";
 	private String objDir = "objFiles/";
 
-	// private String obj = "tieMini";
+	// private String obj = "earth";
 	// private String obj = "cubeLow";
 	// private String obj = "cubeEdgeCut";
 	// private String obj = "cubeCuts";
@@ -31,21 +31,27 @@ public class ArcScratch3D {
 	// private String obj = "cubeLowWithEdges";
 	// private String obj = "cubeHiStraight";
 	// private String obj = "DeathStar";
+	// private String obj = "tieFull";
+	private String obj = "building";
+	// private String obj = "spheres10";
 	// private String obj = "coneHi";
 	// private String obj = "sphereMed";
-	private String obj = "cubeHole";
-	// private String obj = "sAndV";
+	// private String obj = "cubeHoleMax";
+	// private String obj = "hook";
 	// private String obj = "cubeHole2";
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
+
+	boolean doClip = true;
+	boolean selectedOnly = false;
 
 	private String src = "ARCscratch3D-" + obj;
 	double dpi = 300;
 	double mm2in = 25.4;
 	double scalemm = 30;
 	double scaleMain = dpi * (scalemm / mm2in);
-	double sf = 0.8;
+	double sf = 1.0;
 
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;
@@ -54,7 +60,7 @@ public class ArcScratch3D {
 
 	double ang = 60;
 	double num = 10;
-	double angInc = ang / (2 * num);
+	double angInc = ang / (4 * num);
 
 	private int cx = (int) (w / 2.0);
 	private int cy = (int) (h / 2.0);
@@ -91,7 +97,9 @@ public class ArcScratch3D {
 		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
-		selectedVerts = objLoader.loadOBJSelectedVerts(dir + objDir + obj + "_sel");
+		if (selectedOnly) {
+			selectedVerts = objLoader.loadOBJSelectedVerts(dir + objDir + obj + "_sel");
+		}
 
 		groups = objLoader.groups;
 		drawAllPoints();
@@ -162,7 +170,9 @@ public class ArcScratch3D {
 
 			for (VertexGeometric origvg : orig2rot.keySet()) {
 				VertexGeometric rotvg = orig2rot.get(origvg);
-				if (!objLoader.isVertexVisible(rotatedFaces, rotvg)) {
+				boolean clipped = isVertexClipped(rotvg, origvg.defs, a);
+				boolean visible = objLoader.isVertexVisible(rotatedFaces, rotvg);
+				if ((doClip && clipped) || !visible) {
 					origvg.defs.arcs.add(false);
 				} else {
 					origvg.defs.arcs.add(true);
@@ -170,9 +180,6 @@ public class ArcScratch3D {
 			}
 		} // all angs
 
-		boolean selectedOnly = true;
-		double st = -ang / 2;
-		double ss = scaleMain * sf;
 		ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
@@ -185,51 +192,100 @@ public class ArcScratch3D {
 				}
 				used.add(vg);
 
-				double r = vg.defs.r * ss;
-				// r = 0.25 * ss + 0.75 * vg.defs.r * ss;
-				double xc = vg.defs.cx * ss;
-				double yc = vg.defs.cy * ss;
-				double z = vg.z;
-				double startPosAng = vg.defs.startPosAng;
-
 				ArrayList<Boolean> arcs = vg.defs.arcs;
-				boolean started = true;
-				boolean startedArc = true;
-				double stAng = st;
-				double enAng = st;
-				for (int i = 0; i < arcs.size(); i++) {
-					boolean arcOnOff = arcs.get(i);
-					if (i == arcs.size() - 1 && startedArc) {
-						drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
-					}
-
-					if (!started) {
-						if (!arcOnOff) {
-							if (startedArc) {
-								drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
-								stAng = enAng + angInc;
-								enAng = enAng + angInc;
-								startedArc = false;
-							} else {
-								stAng = enAng;
-								enAng = enAng + angInc;
-							}
-						} else {
-							startedArc = true;
-							enAng = enAng + angInc;
-						}
-					} else {
-						started = false;
-						startedArc = false;
-					}
-				}
-				// if (noParts) {
-				// svgDescriber.drawAndAddArc(cx + xc, cy + yc, r, startPosAng +
-				// st, startPosAng + st + aa);
-				// }
+				drawVisibleArcs(arcs, vg);
 			}
 		}
+	}
 
+	private void drawVisibleArcs(ArrayList<Boolean> arcs, VertexGeometric vg) {
+		double st = -ang / 2;
+		double ss = scaleMain * sf;
+		double r = vg.defs.r * ss;
+		// r = 0.25 * ss + 0.75 * vg.defs.r * ss;
+		double xc = vg.defs.cx * ss;
+		double yc = vg.defs.cy * ss;
+		double z = vg.z;
+		double startPosAng = vg.defs.startPosAng;
+
+		double arcSt = st;
+		double arcEn = st + angInc;
+		boolean lastArcOn = false;
+		for (int i = 0; i < arcs.size(); i++) {
+			double arcSt2 = arcSt + angInc;
+			double arcEn2 = arcEn - angInc;
+			boolean arcOn = arcs.get(i);
+			if (arcOn) {
+				if ((i == arcs.size() - 1)) {
+					drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+				}
+				lastArcOn = true;
+				arcEn = arcEn + angInc;
+			} else {
+				if (lastArcOn) {
+					drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+					arcSt = arcEn;
+				}
+				lastArcOn = false;
+				arcEn = arcEn + angInc;
+				arcSt = arcSt + angInc;
+			}
+		}
+	}
+
+	private boolean isVertexClipped(VertexGeometric vg, ArcScratchDefs defs, double a) {
+		double ss = scaleMain * sf;
+		double r = defs.r * ss;
+		double xc = defs.cx * ss;
+		double yc = defs.cy * ss;
+		double st = defs.startPosAng;
+
+		double g = 180;
+		double y = -yc;
+		double s = (st - a) + g;
+		return svgDescriber.isClipped(cx + xc, cy + y, r, s - angInc);
+	}
+
+	private void drawVisibleArcs1(ArrayList<Boolean> arcs, VertexGeometric vg) {
+		double st = -ang / 2;
+		double ss = scaleMain * sf;
+		double r = vg.defs.r * ss;
+		// r = 0.25 * ss + 0.75 * vg.defs.r * ss;
+		double xc = vg.defs.cx * ss;
+		double yc = vg.defs.cy * ss;
+		double z = vg.z;
+		double startPosAng = vg.defs.startPosAng;
+
+		boolean started = true;
+		boolean startedArc = true;
+		double stAng = st;
+		double enAng = st;
+		for (int i = 0; i < arcs.size(); i++) {
+			boolean arcOnOff = arcs.get(i);
+			if (i == arcs.size() - 1 && startedArc) {
+				drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
+			}
+
+			if (!started) {
+				if (!arcOnOff) {
+					if (startedArc) {
+						drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
+						stAng = enAng + angInc;
+						enAng = enAng + angInc;
+						startedArc = false;
+					} else {
+						stAng = enAng;
+						enAng = enAng + angInc;
+					}
+				} else {
+					startedArc = true;
+					enAng = enAng + angInc;
+				}
+			} else {
+				started = false;
+				startedArc = false;
+			}
+		}
 	}
 
 	private boolean selectedVertsContains(VertexGeometric vg) {

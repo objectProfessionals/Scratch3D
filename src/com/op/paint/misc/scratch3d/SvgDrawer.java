@@ -21,6 +21,7 @@ public class SvgDrawer {
 	public ArrayList<ScratchArc> allScratches = new ArrayList<ScratchArc>();
 	boolean square;
 	boolean circle;
+	int sqOff = 50;
 
 	public SvgDrawer(String opDir, String src, double w, double h) {
 		this.opDir = opDir;
@@ -104,16 +105,23 @@ public class SvgDrawer {
 		writer.println("<svg width=\"" + ((int) w) + "\" height=\"" + ((int) (h))
 				+ "\" xmlns=\"http://www.w3.org/2000/svg\">");
 		writer.println("");
-		int rad = 50;
-		int dd = (int) (w - rad);
+		int dd = (int) (w - sqOff);
 		// writer.println("<rect x=\"" + rad + "\" y=\"" + rad + "\" width=\"" +
 		// (w - rad * 2) + "\" height=\""
 		// + (h - rad * 2) + "\" rx=\"" + rad + "\" ry=\"" + rad + "\"
 		// stroke=\"blue\" fill=\"none\"/>");
 		writer.println("<path d=\"");
 		if (square) {
-			writer.println("M" + rad + " " + rad + " L" + dd + " " + rad + " L" + dd + " " + dd + " L" + rad + " " + dd
-					+ " Z");
+			// writer.println("M" + sqOff + " " + sqOff + " L" + dd + " " +
+			// sqOff + " L" + dd + " " + dd + " L" + sqOff
+			// + " " + dd + " Z");
+
+			double sqOff2 = sqOff * 2;
+			writer.println("M" + sqOff + " " + sqOff2 + " L" + sqOff + " " + sqOff + " L" + sqOff2 + " " + sqOff);
+			writer.println("M" + (dd - sqOff) + " " + sqOff + " L" + dd + " " + sqOff + " L" + dd + " " + sqOff2);
+
+			writer.println("M" + sqOff + " " + (dd - sqOff) + " L" + sqOff + " " + (dd) + " L" + sqOff2 + " " + dd);
+			writer.println("M" + (dd - sqOff) + " " + dd + " L" + dd + " " + dd + " L" + (dd) + " " + (dd - sqOff));
 		} else if (circle) {
 			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.5)));
 			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.1)));
@@ -151,7 +159,29 @@ public class SvgDrawer {
 		String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radius) + " " + formatD(radius)
 				+ " 0" + " " + largeArcFlag + " " + "0" + " " + formatD(end.x) + " " + formatD(end.y);
 
+		if ((int) start.x == 38 && (int) start.y == 956) {
+			boolean a = false;
+		}
+
 		return d;
+	}
+
+	boolean isClipped(double cx, double cy, double radius, double startAngle) {
+
+		VertexGeometric start = polarToCartesian(cx, cy, radius, startAngle);
+
+		double x1 = start.x;
+		double y1 = start.y;
+		double d1 = (sqOff);
+		double d2 = (w - sqOff);
+
+		if (x1 < d1 || x1 > d2 || y1 < d1 || y1 > d2) {
+			// System.out.println("x,y=" + start.x + "," + start.y + " cx=" + cx
+			// + " cy=" + cy + " r=" + radius + " s="
+			// + (startAngle % 360));
+			return true;
+		}
+		return false;
 	}
 
 	String addCircle(double cx, double cy, double radius) {
