@@ -127,7 +127,7 @@ public class ObjLoader {
 	}
 
 	private boolean equals(float x, float x2) {
-		return Math.abs(x - x2) < 0.0001;
+		return Math.abs(x - x2) < 0.001;
 	}
 
 }

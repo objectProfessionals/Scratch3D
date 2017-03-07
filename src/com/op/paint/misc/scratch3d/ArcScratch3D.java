@@ -28,11 +28,13 @@ public class ArcScratch3D {
 	// private String obj = "cubeCuts";
 	// private String obj = "cubeHi";
 	// private String obj = "spheres";
+	// private String obj = "Falcon";
 	// private String obj = "cubeLowWithEdges";
 	// private String obj = "cubeHiStraight";
 	// private String obj = "DeathStar";
 	// private String obj = "tieFull";
-	private String obj = "building";
+	// private String obj = "spikey";
+	private String obj = "KD-SphereHoles";
 	// private String obj = "spheres10";
 	// private String obj = "coneHi";
 	// private String obj = "sphereMed";
@@ -51,7 +53,7 @@ public class ArcScratch3D {
 	double mm2in = 25.4;
 	double scalemm = 30;
 	double scaleMain = dpi * (scalemm / mm2in);
-	double sf = 1.0;
+	double sf = 1.1;
 
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;
@@ -73,6 +75,8 @@ public class ArcScratch3D {
 	private static ArcScratch3D scratch3D = new ArcScratch3D();
 
 	double vanZ = 10;
+	double minRadF = 0.95;
+
 	ObjLoader objLoader = new ObjLoader();
 	SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h);
 	boolean savePNG = false;
@@ -117,7 +121,6 @@ public class ArcScratch3D {
 	}
 
 	public void drawTransformedFacesForArc(boolean adjustForPerspective) {
-		double radf = 0.9;
 		for (Face face : originalFaces) {
 			for (FaceVertex fv : face.vertices) {
 				VertexGeometric vg = fv.v;
@@ -129,7 +132,7 @@ public class ArcScratch3D {
 				// double x = vg.x;
 				// double y = vg.y;
 				double z = vg.z;
-				double rad = (1 - radf) + radf * (Math.abs(z));
+				double rad = (1 - minRadF) + minRadF * (Math.abs(z));
 
 				if (vg.defs == null) {
 					vg.defs = new ArcScratchDefs();
