@@ -9,7 +9,7 @@ package com.owens.oobjloader.builder;
 // In addition this code may also be used under the "unlicense" described
 // at http://unlicense.org/ .  See the file UNLICENSE in the repo.
 
-import com.op.paint.misc.scratch3d.BuilderInterface;
+import com.op.scratch3d.BuilderInterface;
 
 
 public class Material {

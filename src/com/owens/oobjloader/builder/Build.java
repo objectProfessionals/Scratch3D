@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import com.op.paint.misc.scratch3d.BuilderInterface;
+import com.op.scratch3d.BuilderInterface;
 
 public class Build implements BuilderInterface {
 

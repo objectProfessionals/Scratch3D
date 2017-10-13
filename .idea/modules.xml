@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Scratch3D.iml" filepath="$PROJECT_DIR$/.idea/Scratch3D.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D_main.iml" group="Scratch3D" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D_test.iml" group="Scratch3D" />
+    </modules>
+  </component>
+</project>
