@@ -22,7 +22,7 @@ public class ArcScratch3D extends Base{
 	private String objDir = hostDir+"objFiles/";
 
 	// private String obj = "earth";
-	private String obj = "cubeLow";
+	//private String obj = "cubeLow";
 	// private String obj = "cubeEdgeCut";
 	// private String obj = "cubeCuts";
 	// private String obj = "cubeHi";
@@ -43,6 +43,7 @@ public class ArcScratch3D extends Base{
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
+	private String obj = "KD-TorusKnot2";
 
 	boolean doClip = true;
 	boolean selectedOnly = false;

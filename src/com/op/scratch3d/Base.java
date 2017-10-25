@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class Base {
 
-    String hostDir = "../host/scratch3d/";
+    protected String hostDir = "../host/scratch3d/";
 
     public static void savePNGFile(BufferedImage opImage, String filePath, double dpi) {
         try {

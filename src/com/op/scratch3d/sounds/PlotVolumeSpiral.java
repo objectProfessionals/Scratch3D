@@ -11,6 +11,9 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+
+import static java.lang.Math.abs;
 
 public class PlotVolumeSpiral extends Base {
     private static final String SPIRAL_LINE = "SpiralLine";
@@ -18,10 +21,12 @@ public class PlotVolumeSpiral extends Base {
     private static final String CIRCLE = "circle";
     private static final String LINEAR = "linear";
     private static final String typeName = SPIRAL_LINE;
+    //private static final String scName = "ILoveYouLow100"; // "hello20";
     private static final String scName = "ILoveYou20"; // "hello20";
+    //private static final String scName = "sine440"; // "hello20";
     private static final String opFileName = typeName + scName; // "hello20";
-    private String dir = "host/images/out/misc/scratch3d/";
-    private String opDir = "../output/";
+    private String opDir = hostDir + "output/";
+    private String ipDir = hostDir + "sounds/";
     private static final String outFileExt = ".png";
     private float fontSize = 3;
     private double volAmp = 1;
@@ -52,7 +57,7 @@ public class PlotVolumeSpiral extends Base {
         tester.setupWholeImage();
         tester.createWavData();
         tester.drawVolume();
-        tester.saveImage();
+        tester.saveSVG();
     }
 
     protected void setupWholeImage() throws IOException {
@@ -70,16 +75,14 @@ public class PlotVolumeSpiral extends Base {
 
         String src = opDir;
 
-        writer = new PrintWriter(src + "SPIRAL.svg", "UTF-8");
+        writer = new PrintWriter(src + opFileName + ".svg", "UTF-8");
         writer.println("<svg width=\"" + w + "\" height=\"" + h + "\" xmlns=\"http://www.w3.org/2000/svg\">");
-        writer.println("");
-        writer.println("<path d=\"");
 
     }
 
     private void createWavData() {
         System.out.println("reading " + scName);
-        String src = opDir;
+        String src = ipDir;
         reader = new WaveFileReader(src + scName + ".wav");
         for (int i = 0; i < reader.getData()[0].length; i++) {
             double r = reader.getData()[0][i];
@@ -108,8 +111,141 @@ public class PlotVolumeSpiral extends Base {
         } else if (typeName.equals(CIRCLE)) {
             drawAsCircle(p);
         } else if (typeName.equals(LINEAR)) {
-            drawAsLinear(p);
+            //drawAsLinear(p);
+            drawAsLineSVG(p);
+            //drawAsLinearSVGLowWithD(p);
         }
+    }
+
+    private void drawAsLineSVG(ArrayList<Point2D> p) {
+        writer.println("<path d=\"");
+        double mid = ((double) w) / 2.0;
+        double totW = 4;
+        double hf = ((double) h) / ((double) (p.size()));
+        drawLine(mid, 0, mid, 1);
+        for (double i = 1; i < p.size(); i = i + 1) {
+            Point2D p1 = p.get((int) i);
+            double vol = p1.getY();
+            double volf = (-min + vol) / (max - min);
+            double wf = totW * volf;
+            double y = i * hf;
+            drawLineTo(mid + wf, y);
+        }
+
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+    }
+
+    private void drawAsLinearSVGLowWithD(ArrayList<Point2D> ps) {
+        writer.println("<path d=\"");
+        int ms = 0;
+        double lastVol = 0;
+        int c = 0;
+        double mx = Math.pow(2, 15);
+
+        HashMap<Integer, Integer> hm = new HashMap();
+        for (int i = 0; i < ps.size(); i = i + 1) {
+            Point2D p1 = ps.get(i);
+            double y = p1.getY();
+            double yy = (-min + y) / (max - min);
+            if (lastVol > 0 && y < 0 || lastVol < 0 && y > 0) {
+                double pp = (Math.abs(y) / mx);
+                int num = 1 + (int) (pp * 50);
+                if (Math.abs(yy) > 0.1) {
+                    int pos = (int) ((double) h * i / 8000);
+                    for (int n = 1; n < num; n++) {
+                        drawLine(0, pos, 100, pos);
+                    }
+                    hm.put(c, num);
+                    c++;
+                }
+            }
+
+            lastVol = y;
+        }
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+        int count = 0;
+        for (int i : hm.keySet()) {
+            System.out.println("c=" + i + ":" + hm.get(i));
+            count = count + hm.get(i);
+        }
+        System.out.println("count=" + count);
+
+    }
+
+    private void drawAsLinearSVGLow(ArrayList<Point2D> ps) {
+        writer.println("<path d=\"");
+        int ms = 0;
+        double lastVol = 0;
+        int c = 0;
+        for (int i = 0; i < ps.size(); i = i + 1) {
+            Point2D p1 = ps.get(i);
+            double y = p1.getY();
+            double yy = (-min + y) / (max - min);
+            if (lastVol > 0 && y < 0 || lastVol < 0 && y > 0) {
+                if (Math.abs(y) > 10) {
+                    int pos = (int) ((double) h * i / 8000);
+                    drawLine(0, pos, 100, pos);
+                    c++;
+                }
+            }
+
+            lastVol = y;
+        }
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+        System.out.println("c=" + c);
+
+    }
+
+    private void drawAsLinearSVG(ArrayList<Point2D> ps) {
+        int ms = 0;
+        double lastVol = 0;
+        double lastyy = 0;
+        writer.println("");
+        String[] cols = {"blue", "red", "green", "cyan", "magenta"};
+
+        double ww = 200;
+
+        double mx = Math.pow(2, 15);
+        for (double k = 0; k < 5; k++) {
+            int c = 0;
+            writer.println("<path d=\"");
+            double dVol = (k) / 5.0;
+            for (double i = 0; i < ps.size(); i = i + 1) {
+                int pos = (int) ((double) h * i / 8000);
+                double sec = i / 8000;
+                Point2D p1 = ps.get((int) i);
+                double vol = p1.getY();
+                double volPos = p1.getY() > 0 ? p1.getY() : 0;
+                double yy = volPos / (mx);
+
+                double x = ww * abs(yy) / (dVol + 0.2);
+
+                if (abs(yy) > dVol && abs(yy) < dVol + 0.2) {
+                    double vDiff = abs(yy) - abs(lastVol);
+                    if (abs(yy) > 0.15) {
+                        drawLine(ww - x, pos, ww + x, pos);
+                        c++;
+                    }
+                }
+                if (lastyy < 0 && yy > 0 || lastyy > 0 && yy < 0) {
+                    lastyy = 0;
+                    lastVol = 0;
+                } else {
+                    lastyy = vol;
+                    lastVol = yy;
+                }
+            }
+            if (c > 0) {
+            }
+            int kk = (int) (20 * k / 5);
+            //String col = "#" + kk + kk + kk;
+            String col = cols[(int) k];
+            //writer.println("\" stroke=\""+col+"\" fill=\"none\" />");
+            writer.println("\" stroke=\"" + col + "\" fill=\"none\" />");
+            //writer.println("\" stroke=\"black\" fill=\"none\" />");
+            System.out.println("tot=" + c + "; col=" + col);
+        }
+
     }
 
     private void drawAsSpiral(ArrayList<Point2D> ps) {
@@ -135,6 +271,7 @@ public class PlotVolumeSpiral extends Base {
         ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
         ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
         int ms = 0;
+        writer.println("<path d=\"");
         for (int i = 0; i < ps.size(); i = i + 1) {
             Point2D p1 = ps.get(i);
             double vol = p1.getY();
@@ -166,7 +303,7 @@ public class PlotVolumeSpiral extends Base {
             double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
             double yy1 = xc + Math.sin(angDeg) * (rs - rrr);
             double yy2 = xc + Math.sin(angDeg) * (rs + rrr);
-            if (Math.abs(yy) > 0.5) {
+            if (abs(yy) > 0.5) {
                 drawLine(xx1, yy1, xx2, yy2);
             }
             drawSpiralCut(xx1, yy1, true);
@@ -182,6 +319,7 @@ public class PlotVolumeSpiral extends Base {
             re = re + fr * frr;
             ms = (ms + 1) % 800;
         }
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
 
         Path2D path = new Path2D.Double();
         for (Point2D.Double p : in) {
@@ -230,17 +368,22 @@ public class PlotVolumeSpiral extends Base {
         writer.println(sb);
     }
 
+    private void drawLineTo(double xe, double ye) {
+        String sb = " L " + xe + " " + ye + " ";
+        writer.println(sb);
+    }
+
     private void drawAsSpiralLine(ArrayList<Point2D> ps) {
         opG.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
         int y = 0;
         int x = 0;
         int xc = w / 2;
         int yc = h / 2;
-        double frr = -0.05;
-        double afr = -0.024;
+        double frr = -0.05; //-0.15;
+        double afr = -0.01; //-0.024;
         double amplHeightmm = 0.5;
         double amplHeight = (dpi * (amplHeightmm / mm2in));
-        double rsmm = 45;
+        double rsmm = wmm*2/10;
         double rimm = 0;
         double rs = (dpi * (rsmm / mm2in));
         double ri = (dpi * (rimm / mm2in));
@@ -260,10 +403,11 @@ public class PlotVolumeSpiral extends Base {
 
         int cr = 10;
         String sd1 = addLine(cx - cr, cy - cr, cx + cr, cy + cr);
-        writer.println(sd1);
+        //writer.println(sd1);
         String sd2 = addLine(cx - cr, cy + cr, cx + cr, cy - cr);
-        writer.println(sd2);
+        //writer.println(sd2);
 
+        writer.println("<path d=\"");
         int ms = 0;
         for (int i = 0; i < ps.size(); i = i + 1) {
             Point2D p1 = ps.get(i);
@@ -313,6 +457,7 @@ public class PlotVolumeSpiral extends Base {
 
         // writer.println(" Z ");
 
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
         Path2D path = new Path2D.Double();
         for (Point2D.Double p : in) {
             if (path.getCurrentPoint() == null) {
@@ -457,15 +602,15 @@ public class PlotVolumeSpiral extends Base {
             double y1 = yc - (rF / 2.0);
             double y2 = yc + (rF / 2.0);
 
-            opG.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+            drawLine((int) x1, (int) y1, (int) x2, (int) y2);
             if (x == w) {
                 x = 0;
                 yc = yc + radsep * 2.0;
                 opG.setStroke(new BasicStroke((float) (dpi / 4), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f,
                         null, 0f));
                 opG.setColor(Color.BLACK);
-                opG.drawLine(0, (int) yc, w, (int) yc);
-                opG.drawLine(0, (int) yc, w, (int) yc);
+                drawLine(0, (int) yc, w, (int) yc);
+                drawLine(0, (int) yc, w, (int) yc);
 
                 opG.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
                 opG.setColor(Color.WHITE);
@@ -474,7 +619,7 @@ public class PlotVolumeSpiral extends Base {
                 opG.setColor(Color.RED);
                 double y11 = yc - (radsep);
                 double y21 = yc + (radsep);
-                opG.drawLine((int) x1, (int) y11, (int) x2, (int) y21);
+                drawLine((int) x1, (int) y11, (int) x2, (int) y21);
                 opG.setColor(Color.WHITE);
             }
 
@@ -557,6 +702,11 @@ public class PlotVolumeSpiral extends Base {
         // writer.print(cutO.substring(0, cutO.length() - 4));
         // writer.println("\" stroke=\"red\" fill=\"none\" />");
 
+        writer.println("</svg>");
+        writer.close();
+    }
+
+    private void saveSVG() {
         writer.println("</svg>");
         writer.close();
     }
