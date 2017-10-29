@@ -43,7 +43,10 @@ public class ArcScratch3D extends Base{
 	// private String obj = "test-planes";
 	// private String obj = "test-z";
 	// private String obj = "test-pyramidSq";
-	private String obj = "KD-TorusKnot2";
+//	private String obj = "KD-TorusKnot2";
+	//private String obj = "KD-NJoint";
+	//private String obj = "SW_Vader";
+	private String obj = "SW_Trooper";
 
 	boolean doClip = true;
 	boolean selectedOnly = false;
@@ -53,7 +56,7 @@ public class ArcScratch3D extends Base{
 	double mm2in = 25.4;
 	double scalemm = 30;
 	double scaleMain = dpi * (scalemm / mm2in);
-	double sf = 1.1;
+	double sf = 1.3;//1.1
 
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;

@@ -1,14 +1,15 @@
 package com.op.scratch3d.sounds;
 
 import com.op.scratch3d.Base;
+import org.apache.batik.ext.awt.geom.PathLength;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,13 +18,15 @@ import static java.lang.Math.abs;
 
 public class PlotVolumeSpiral extends Base {
     private static final String SPIRAL_LINE = "SpiralLine";
+    private static final String SPIRAL_LINE_SCORE = "SpiralLineScore";
     private static final String SPIRAL = "Spiral";
     private static final String CIRCLE = "circle";
     private static final String LINEAR = "linear";
-    private static final String typeName = SPIRAL_LINE;
-    //private static final String scName = "ILoveYouLow100"; // "hello20";
-    private static final String scName = "ILoveYou20"; // "hello20";
-    //private static final String scName = "sine440"; // "hello20";
+    private static final String LINEAR_SCORE = "score";
+    private static final String typeName = LINEAR;
+    private static final String scName = "ILoveYouLow500Hz"; // "hello20";
+    //private static final String scName = "ILoveYou20"; // "hello20";
+    //private static final String scName = "sine100-500-0.3s"; // "hello20";
     private static final String opFileName = typeName + scName; // "hello20";
     private String opDir = hostDir + "output/";
     private String ipDir = hostDir + "sounds/";
@@ -35,7 +38,9 @@ public class PlotVolumeSpiral extends Base {
     private double dpi = 300;
     // private double dpi = 75;
     private double mm2in = 25.4;
-    private double wmm = 100;
+    //private double wmm = 10;
+    //private double hmm = 150;
+    private double wmm = 100;//LINEAR
     private double hmm = 100;
     private int w = (int) (dpi * (wmm / mm2in));
     private int h = (int) (dpi * (hmm / mm2in));
@@ -46,8 +51,6 @@ public class PlotVolumeSpiral extends Base {
     private double border = (dpi * (bordermm / mm2in));
     private double max = -1;
     private double min = 1000000;
-    private BufferedImage opImage;
-    private Graphics2D opG;
     private PrintWriter writer;
     private String cut = "";
     private String cutO = "";
@@ -62,17 +65,6 @@ public class PlotVolumeSpiral extends Base {
 
     protected void setupWholeImage() throws IOException {
         System.out.println("Creating...");
-        opImage = createBufferedImage(w, h);
-        opG = (Graphics2D) opImage.getGraphics();
-        opG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        opG.setColor(Color.WHITE);
-        opG.fillRect(0, 0, w, h);
-        opG.setColor(Color.WHITE);
-
-        Font currentFont = opG.getFont();
-        Font newFont = currentFont.deriveFont(currentFont.getSize() * fontSize);
-        opG.setFont(newFont);
-
         String src = opDir;
 
         writer = new PrintWriter(src + opFileName + ".svg", "UTF-8");
@@ -108,29 +100,68 @@ public class PlotVolumeSpiral extends Base {
             drawAsSpiral(p);
         } else if (typeName.equals(SPIRAL_LINE)) {
             drawAsSpiralLine(p);
+        } else if (typeName.equals(SPIRAL_LINE_SCORE)) {
+            drawAsSpiralLineScore(p);
         } else if (typeName.equals(CIRCLE)) {
             drawAsCircle(p);
         } else if (typeName.equals(LINEAR)) {
             //drawAsLinear(p);
             drawAsLineSVG(p);
-            //drawAsLinearSVGLowWithD(p);
+        } else if (typeName.equals(LINEAR_SCORE)) {
+            drawAsLinearScore(p);
         }
+    }
+
+    private void drawAsLinearScore(ArrayList<Point2D> p) {
+        writer.println("<path d=\"");
+        double hf = ((double) h) / ((double) (p.size()));
+        drawLine(0, 0, w, 0);
+
+        double inc = 2;
+        int count = 0;
+        for (double i = 1; i < p.size(); i = i + 2) {
+            Point2D p1 = p.get((int) i);
+            double vol = p1.getY();
+            double volf = (-min + vol) / (max - min);
+
+            double y = i * hf;
+            double dd = 10;
+
+            int num = (int)((1-volf)*dd) - (int)(dd/2);
+            num = num >0 ? num : 0;
+            count = count + num;
+            System.out.println("num="+num);
+            for (int j=0; j<num; j++) {
+                drawLine(0, y, w, y);
+            }
+        }
+
+        System.out.println("count="+count);
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
     }
 
     private void drawAsLineSVG(ArrayList<Point2D> p) {
         writer.println("<path d=\"");
-        double mid = ((double) w) / 2.0;
-        double totW = 4;
+        double amplHeightmm = 0.1; //25;
+        double amplHeight = (dpi * (amplHeightmm / mm2in));
+
+        double widthmm = 4.75;
+        double width = (dpi * (widthmm/ mm2in));
+
+        double mid = width/2;
         double hf = ((double) h) / ((double) (p.size()));
-        drawLine(mid, 0, mid, 1);
-        for (double i = 1; i < p.size(); i = i + 1) {
+        drawLine(mid, 0, mid, 0);
+
+        double inc = 2;
+        for (double i = 1; i < p.size(); i = i + 2) {
             Point2D p1 = p.get((int) i);
             double vol = p1.getY();
             double volf = (-min + vol) / (max - min);
-            double wf = totW * volf;
+            double wf = amplHeight* volf;
             double y = i * hf;
             drawLineTo(mid + wf, y);
         }
+
 
         writer.println("\" stroke=\"black\" fill=\"none\" />");
     }
@@ -249,7 +280,6 @@ public class PlotVolumeSpiral extends Base {
     }
 
     private void drawAsSpiral(ArrayList<Point2D> ps) {
-        opG.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
         int y = 0;
         int x = 0;
         int xc = w / 2;
@@ -261,12 +291,6 @@ public class PlotVolumeSpiral extends Base {
         double ang = 0;
 
         int rr = 10;
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        opG.fillOval(xc - rr, yc - rr, rr * 2, rr * 2);
-        opG.drawString("  " + scName, xc, yc);
-
-        opG.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
 
         ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
         ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
@@ -334,12 +358,6 @@ public class PlotVolumeSpiral extends Base {
             path.lineTo(p.x, p.y);
         }
 
-        opG.setColor(Color.WHITE);
-        opG.fill(path);
-
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        // opG.drawOval(0, 0, w, h);
         System.out.println(x + ":" + y);
     }
 
@@ -363,9 +381,23 @@ public class PlotVolumeSpiral extends Base {
         }
     }
 
-    private void drawLine(double xs, double ys, double xe, double ye) {
+    private void drawLineORIG(double xs, double ys, double xe, double ye) {
         String sb = "M " + xs + " " + ys + " L " + xe + " " + ye + " ";
         writer.println(sb);
+    }
+
+    private void drawLine(double xs, double ys, double xe, double ye) {
+
+        String sb = "M " + round(xs, 2) + " " + round(ys, 2) + " L " + round(xe, 2) + " " + round(ye, 2) + " ";
+        writer.println(sb);
+    }
+
+    public double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     private void drawLineTo(double xe, double ye) {
@@ -374,106 +406,174 @@ public class PlotVolumeSpiral extends Base {
     }
 
     private void drawAsSpiralLine(ArrayList<Point2D> ps) {
-        opG.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
         int y = 0;
         int x = 0;
         int xc = w / 2;
         int yc = h / 2;
-        double frr = -0.05; //-0.15;
-        double afr = -0.01; //-0.024;
-        double amplHeightmm = 0.5;
+        int inc = 1;
+        double frr = -0.113; //-0.15;
+        double afr = -0.05; //-0.024;
+        double amplHeightmm = 0.25;
         double amplHeight = (dpi * (amplHeightmm / mm2in));
-        double rsmm = wmm*2/10;
-        double rimm = 0;
-        double rs = (dpi * (rsmm / mm2in));
-        double ri = (dpi * (rimm / mm2in));
-        double re = rs + amplHeight + ri;
+        double cutHeightmm = 3;
+        double cutHeight = (dpi * (cutHeightmm / mm2in));
+        double radStartmm = wmm * 4 / 10;
+        double radStart = (dpi * (radStartmm / mm2in));
         double ang = 0;
-
-        int rr = 10;
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        opG.fillOval(xc - rr, yc - rr, rr * 2, rr * 2);
-        opG.drawString("  " + scName, xc, yc);
-
-        opG.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-
         ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
-        ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
-
-        int cr = 10;
-        String sd1 = addLine(cx - cr, cy - cr, cx + cr, cy + cr);
-        //writer.println(sd1);
-        String sd2 = addLine(cx - cr, cy + cr, cx + cr, cy - cr);
-        //writer.println(sd2);
+        Point2D.Double first = null;
+        Point2D.Double last = null;
 
         writer.println("<path d=\"");
         int ms = 0;
-        for (int i = 0; i < ps.size(); i = i + 1) {
+        for (int i = 0; i < ps.size(); i = i + inc) {
             Point2D p1 = ps.get(i);
             double vol = p1.getY();
             double yy = (-min + vol) / (max - min);
             double rF = (0.5 - yy) * amplHeight;
-            // double rF = yy * radsep;
 
             double angDeg = Math.toRadians(ang);
-            double xs = xc + Math.cos(angDeg) * rs;
-            double x1 = xc + Math.cos(angDeg) * (rs - (rF / 2.0));
-            double x2 = xc + Math.cos(angDeg) * (rs + (rF / 2.0));
-            double xe = xc + Math.cos(angDeg) * re;
-
-            double ys = yc + Math.sin(angDeg) * rs;
-            double y1 = xc + Math.sin(angDeg) * (rs - (rF / 2.0));
-            double y2 = yc + Math.sin(angDeg) * (rs + (rF / 2.0));
-            double ye = yc + Math.sin(angDeg) * re;
-
-            in.add(new Point2D.Double(x1, y1));
-            out.add(new Point2D.Double(x2, y2));
-
-            if (ms == 799) {
-                opG.drawLine((int) xs, (int) ys, (int) xe, (int) ye);
-            }
+            double x1 = xc + Math.cos(angDeg) * (radStart - (rF / 2.0));
+            double y1 = xc + Math.sin(angDeg) * (radStart - (rF / 2.0));
 
             drawSpiralLineCut(i, x1, y1);
+            if (first == null) {
+                first = new Point2D.Double(x1, y1);
+            }
+            last = new Point2D.Double(x1, y1);
 
-            double rrr = amplHeight * 4;
-            double xx1 = xc + Math.cos(angDeg) * (rs - rrr);
-            double xx2 = xc + Math.cos(angDeg) * (rs + rrr);
-            double yy1 = xc + Math.sin(angDeg) * (rs - rrr);
-            double yy2 = xc + Math.sin(angDeg) * (rs + rrr);
-            // drawSpiralCut(xx1, yy1, true);
-            // drawSpiralCut(xx2, yy2, false);
+            double rrr = cutHeight;
+            double xx1 = xc + Math.cos(angDeg) * (radStart - rrr);
+            double xx2 = xc + Math.cos(angDeg) * (radStart + rrr);
+            double yy1 = xc + Math.sin(angDeg) * (radStart - rrr);
+            double yy2 = xc + Math.sin(angDeg) * (radStart + rrr);
+            in.add(new Point2D.Double(xx1, yy1));
 
-            double cir = 2 * Math.PI * rs;
+            double cir = 2 * Math.PI * radStart;
             double fr = (360.0 / cir);
             ang = ang + fr + afr;
 
             System.out.println("ang=" + ang);
             // frr = frr + 0.0001;
-            rs = rs + fr * frr;
-            re = re + fr * frr;
+            radStart = radStart + fr * frr;
             ms = (ms + 1) % 800;
         }
 
-        // writer.println(" Z ");
-
-        writer.println("\" stroke=\"black\" fill=\"none\" />");
-        Path2D path = new Path2D.Double();
-        for (Point2D.Double p : in) {
+        drawSpiralLineCut(1, last.x, last.y);
+        Path2D.Double path = new Path2D.Double();
+        for (int i = in.size() - 1; i > 0; i = i - inc) {
+            Point2D.Double p = in.get(i);
             if (path.getCurrentPoint() == null) {
                 path.moveTo(p.x, p.y);
             } else {
                 path.lineTo(p.x, p.y);
             }
+            drawSpiralLineCut(i, p.x, p.y);
+        }
+        drawSpiralLineCut(1, first.x, first.y);
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+
+        System.out.println(x + ":" + y);
+
+        PathLength pl = new PathLength(path);
+        double len = pl.lengthOfPath();
+        double lenmm= mm2in *(len/ dpi);
+        System.out.println("**** LENpx="+len+"LENmm=" + lenmm);
+
+    }
+
+    private void drawAsSpiralLineScore(ArrayList<Point2D> ps) {
+        int y = 0;
+        int x = 0;
+        int xc = w / 2;
+        int yc = h / 2;
+        int inc = 1;
+        double frr = -0.13;//13; //-0.15;
+        double afr = -0.005; //-0.024;
+        double amplHeightmm = 0.25;
+        double amplHeight = (dpi * (amplHeightmm / mm2in));
+        double cutHeightmm = 1.75;
+        double cutHeight = (dpi * (cutHeightmm / mm2in));
+        double radStartmm = wmm * 4 / 10;
+        double radStart = (dpi * (radStartmm / mm2in));
+        double ang = 0;
+        ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
+        ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
+        Point2D.Double first = null;
+        Point2D.Double last = null;
+
+        writer.println("<path d=\"");
+        int ms = 0;
+        for (int i = 0; i < ps.size(); i = i + inc) {
+            Point2D p1 = ps.get(i);
+            double vol = p1.getY();
+            double yy = (-min + vol) / (max - min);
+            double rF = (0.5 - yy) * amplHeight;
+
+            double angDeg = Math.toRadians(ang);
+            double x1 = xc + Math.cos(angDeg) * (radStart - (rF / 2.0));
+            double y1 = xc + Math.sin(angDeg) * (radStart - (rF / 2.0));
+
+            if (first == null) {
+                first = new Point2D.Double(x1, y1);
+                drawLine(x1, y1, x1, y1);
+            } else {
+                drawLineTo(x1, y1);
+            }
+            last = new Point2D.Double(x1, y1);
+
+            double rrr = cutHeight;
+            double xx1 = xc + Math.cos(angDeg) * (radStart - rrr);
+            double xx2 = xc + Math.cos(angDeg) * (radStart + rrr);
+            double yy1 = xc + Math.sin(angDeg) * (radStart - rrr);
+            double yy2 = xc + Math.sin(angDeg) * (radStart + rrr);
+            in.add(new Point2D.Double(xx1, yy1));
+            out.add(new Point2D.Double(xx2, yy2));
+
+            double cir = 2 * Math.PI * radStart;
+            double fr = (360.0 / cir);
+            ang = ang + fr + afr;
+
+            System.out.println("ang=" + ang);
+            // frr = frr + 0.0001;
+            radStart = radStart + fr * frr;
+            ms = (ms + 1) % 800;
         }
 
-        opG.setColor(Color.BLACK);
-        opG.draw(path);
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
 
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        opG.drawOval(0, 0, w, h);
-        System.out.println(x + ":" + y);
+        writer.println("<path d=\"");
+        Path2D.Double path = new Path2D.Double();
+        Point2D.Double pL = out.get(out.size()-1);
+        for (int i = in.size() - 1; i > 0; i = i - inc) {
+            Point2D.Double p = in.get(i);
+            if (path.getCurrentPoint() == null) {
+                path.moveTo(p.x, p.y);
+                drawLine(pL.x, pL.y, p.x, p.y);
+            } else {
+                path.lineTo(p.x, p.y);
+            }
+            drawLineTo(p.x, p.y);
+        }
+
+        path = new Path2D.Double();
+        for (int i = 0; i <out.size(); i = i + inc) {
+            Point2D.Double p = out.get(i);
+            if (path.getCurrentPoint() == null) {
+                drawLineTo(p.x, p.y);
+                path.moveTo(p.x, p.y);
+            } else {
+                path.lineTo(p.x, p.y);
+            }
+            drawLineTo(p.x, p.y);
+        }
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+
+        PathLength pl = new PathLength(path);
+        double len = pl.lengthOfPath();
+        double lenmm= mm2in *(len/ dpi);
+        System.out.println("**** LENpx="+len+"LENmm=" + lenmm);
+
     }
 
     String addLine(double x1, double y1, double x2, double y2) {
@@ -492,7 +592,6 @@ public class PlotVolumeSpiral extends Base {
     }
 
     private void drawAsCircle(ArrayList<Point2D> ps) {
-        opG.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
         int y = 0;
         int x = 0;
         int xc = w / 2;
@@ -503,17 +602,6 @@ public class PlotVolumeSpiral extends Base {
         double ang = 0;
 
         int rr = 10;
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        opG.fillOval(xc - rr, yc - rr, rr * 2, rr * 2);
-        opG.drawString("  " + scName, xc, yc);
-
-        opG.setStroke(new BasicStroke((float) (dpi / 4), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.BLACK);
-        opG.drawOval((int) (xc - rs), (int) (yc - rs), (int) (rs * 2), (int) (rs * 2));
-
-        opG.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
 
         ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
         ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
@@ -540,7 +628,6 @@ public class PlotVolumeSpiral extends Base {
                 double xe = xc + Math.cos(angDeg) * (rs + rd);
                 double ys = yc + Math.sin(angDeg) * (rs - rd);
                 double ye = yc + Math.sin(angDeg) * (rs + rd);
-                opG.drawLine((int) xs, (int) ys, (int) xe, (int) ye);
             }
 
             double fr = (360.0 / 8000.0);
@@ -562,34 +649,18 @@ public class PlotVolumeSpiral extends Base {
             path.lineTo(p.x, p.y);
         }
 
-        opG.setColor(Color.WHITE);
-        opG.fill(path);
-
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        // opG.drawOval(0, 0, w, h);
         System.out.println(x + ":" + y);
     }
 
     private void drawAsLinear(ArrayList<Point2D> ps) {
-        opG.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
         int y = 0;
         int x = 0;
         int xc = 0;
         double radsep = dpi / 4.0;
         double yc = radsep * 2.0;
 
-        opG.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        opG.drawString("  " + scName, 50, 50);
-
-        opG.setStroke(new BasicStroke((float) (dpi / 4), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.BLACK);
-        opG.drawLine(0, (int) yc, w, (int) yc);
-
-        opG.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.WHITE);
         int ms = 0;
+        writer.println("<path d=\"");
         for (int i = 0; i < ps.size(); i = i + 1) {
             Point2D p1 = ps.get(i);
             double vol = p1.getY();
@@ -606,30 +677,20 @@ public class PlotVolumeSpiral extends Base {
             if (x == w) {
                 x = 0;
                 yc = yc + radsep * 2.0;
-                opG.setStroke(new BasicStroke((float) (dpi / 4), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f,
-                        null, 0f));
-                opG.setColor(Color.BLACK);
                 drawLine(0, (int) yc, w, (int) yc);
                 drawLine(0, (int) yc, w, (int) yc);
-
-                opG.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-                opG.setColor(Color.WHITE);
             }
             if (ms == 799) {
-                opG.setColor(Color.RED);
                 double y11 = yc - (radsep);
                 double y21 = yc + (radsep);
                 drawLine((int) x1, (int) y11, (int) x2, (int) y21);
-                opG.setColor(Color.WHITE);
             }
 
             ms = (ms + 1) % 800;
             x++;
         }
 
-        opG.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, null, 0f));
-        opG.setColor(Color.RED);
-        // opG.drawOval(0, 0, w, h);
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
         System.out.println(x + ":" + y);
     }
 
@@ -668,42 +729,6 @@ public class PlotVolumeSpiral extends Base {
             return -Math.pow(-val, volAmp);
         }
         return Math.pow(val, volAmp);
-    }
-
-    protected void saveImage() throws Exception {
-        BufferedImage opImage3 = opImage;
-        if (addBorder) {
-            int ww = (int) (((double) w) + border);
-            int hh = (int) (((double) h) + border);
-            int wd = (int) (border);
-            int hd = (int) (border);
-            BufferedImage opImage2 = createBufferedImage(ww, hh);
-            Graphics2D opG2 = (Graphics2D) opImage2.getGraphics();
-            opG2.setColor(Color.WHITE);
-            opG2.fillRect(0, 0, ww, hh);
-            opG2.drawImage(opImage, null, wd, hd);
-            opImage3 = opImage2;
-        }
-        System.out.println("Saving...");
-        String src = opDir;
-        if (outFileExt.equals(".png")) {
-            savePNGFile(opImage3, src + opFileName + outFileExt, dpi);
-        } else {
-            saveJPGFile(opImage3, src + opFileName + outFileExt, dpi, 1);
-        }
-        opG.dispose();
-        printFileInfo(src + opFileName + outFileExt);
-
-        writer.println("\" stroke=\"blue\" fill=\"none\" />");
-
-        // writer.print(cut.substring(0, cut.length() - 4));
-        // writer.println("\" stroke=\"red\" fill=\"none\" />");
-        //
-        // writer.print(cutO.substring(0, cutO.length() - 4));
-        // writer.println("\" stroke=\"red\" fill=\"none\" />");
-
-        writer.println("</svg>");
-        writer.close();
     }
 
     private void saveSVG() {
