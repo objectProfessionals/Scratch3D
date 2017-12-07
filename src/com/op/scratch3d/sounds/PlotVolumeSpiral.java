@@ -38,10 +38,10 @@ public class PlotVolumeSpiral extends Base {
     private double dpi = 300;
     // private double dpi = 75;
     private double mm2in = 25.4;
-    //private double wmm = 10;
-    //private double hmm = 150;
-    private double wmm = 100;//LINEAR
-    private double hmm = 100;
+    private double wmm = 5.5;
+    private double hmm = 590;
+    //private double wmm = 100;//LINEAR
+    //private double hmm = 100;
     private int w = (int) (dpi * (wmm / mm2in));
     private int h = (int) (dpi * (hmm / mm2in));
     private int cx = w / 2;
@@ -142,15 +142,15 @@ public class PlotVolumeSpiral extends Base {
 
     private void drawAsLineSVG(ArrayList<Point2D> p) {
         writer.println("<path d=\"");
-        double amplHeightmm = 0.1; //25;
+        double amplHeightmm = 0.25; //25;
         double amplHeight = (dpi * (amplHeightmm / mm2in));
 
-        double widthmm = 4.75;
+        double widthmm = (wmm-amplHeightmm*2)*0.9;
         double width = (dpi * (widthmm/ mm2in));
+        double edge = width;
 
-        double mid = width/2;
         double hf = ((double) h) / ((double) (p.size()));
-        drawLine(mid, 0, mid, 0);
+        drawLine(w, 0, w, 0);
 
         double inc = 2;
         for (double i = 1; i < p.size(); i = i + 2) {
@@ -159,9 +159,11 @@ public class PlotVolumeSpiral extends Base {
             double volf = (-min + vol) / (max - min);
             double wf = amplHeight* volf;
             double y = i * hf;
-            drawLineTo(mid + wf, y);
+            drawLineTo(edge + wf, y);
         }
-
+//        drawLineTo(w, h);
+//        drawLineTo(0, h);
+//        drawLineTo(0, 0);
 
         writer.println("\" stroke=\"black\" fill=\"none\" />");
     }
