@@ -7,16 +7,17 @@ import java.util.ArrayList;
 import com.owens.oobjloader.builder.Face;
 import com.owens.oobjloader.builder.VertexGeometric;
 
-public class RotateScratch3D {
+public class RotateScratch3D extends Base {
 
-	private String dir = "host/images/out/misc/scratch3d/";
-	private String opDir = "../output/";
-	private String objDir = "objFiles/";
+	private String opDir = hostDir+"output/";
+	private String objDir = hostDir+"objFiles/";
+
 	// private String obj = "tieMini";
 	// private String obj = "cubeLow";
 	// private String obj = "coneHi";
+	 private String obj = "cubeHi";
 	// private String obj = "cubeLowWithEdges";
-	private String obj = "VS";
+	//private String obj = "VS";
 	// private String obj = "heart";
 	// private String obj = "DeathStarLow";
 	// private String obj = "test-planes";
@@ -39,8 +40,7 @@ public class RotateScratch3D {
 	private int cy = (int) (h / 2.0);
 	double radArc = dpi * (radArcmm / mm2in);
 
-	double radArcMinF = 0.1;
-	double glintAngle = 60;
+	double glintAngle = 15;
 	double numOfGlints = 10; // 90 / glintAngle;
 	double totRotAng = 30; // 45;
 	double incRotAng = totRotAng / numOfGlints;
@@ -64,7 +64,7 @@ public class RotateScratch3D {
 	private void draw() throws FileNotFoundException, IOException {
 		svgDrawer.startSVG(true, false);
 
-		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
+		originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 		drawAllPoints();
 
@@ -103,7 +103,7 @@ public class RotateScratch3D {
 
 	private void drawPoint(VertexGeometric p1, double aDegs) {
 		boolean adjustForPerspective = true;
-		boolean occlude = false;
+		boolean occlude = true;
 		VertexGeometric p2 = p1;
 		ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective);
 		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective);

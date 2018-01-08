@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import com.owens.oobjloader.builder.Face;
 import com.owens.oobjloader.builder.VertexGeometric;
 
-public class CircleScratch3D {
-	private String dir = "host/images/out/misc/scratch3d/";
-	private String opDir = "../output/";
-	private String objDir = "objFiles/";
+public class CircleScratch3D extends Base{
+	private String opDir = hostDir+"output/";
+	private String objDir = hostDir+"objFiles/";
+
 	// private String obj = "tie";
 	// private String obj = "cubeHiSq";
 	// private String obj = "Heart";
 	// private String obj = "cubeHiEdges";
 	// private String obj = "cubeLow";
-	private String obj = "cubeLowWithEdges";
+	private String obj = "cubeHi";
 	// private String obj = "cubeTris";
 	// private String obj = "coneLowWithEdges";
 	// private String obj = "sphereMed";
@@ -26,10 +26,9 @@ public class CircleScratch3D {
 	// private String obj = "test-pyramidSq";
 
 	private String src = "CIRscratch3D-" + obj;
-	double dpi = 300;
+	double dpi = 90;
 	double mm2in = 25.4;
-	double scalemm = 25;
-	double radArcmm = 27.5;
+	double scalemm = 100;
 	private double wmm = scalemm * 3;
 	private double hmm = scalemm * 3;
 	private double w = dpi * (wmm / mm2in);
@@ -37,7 +36,7 @@ public class CircleScratch3D {
 	private int cx = (int) (w / 2.0);
 	private int cy = (int) (h / 2.0);
 	double scaleMain = dpi * (scalemm / mm2in);
-	double radArc = dpi * (radArcmm / mm2in);
+	double scaleObject = 0.3;
 
 	ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
 	ArrayList<Face> originalFaces = new ArrayList<Face>();
@@ -47,8 +46,11 @@ public class CircleScratch3D {
 	VertexTransformer vertexTransformer;
 
 	private int totRotAng = 360;
-	private double incRotAng = 15; // 6;
-	private double arcAngHalf = 15;
+	private double incRotAng = 45; // 6;
+	private double arcAngHalf = 30;
+	private double arcAngHalf2 = 10;
+	boolean adjustForPerspective = false;
+	boolean occlude = true;
 
 	private static CircleScratch3D scratch3D = new CircleScratch3D();
 
@@ -59,7 +61,7 @@ public class CircleScratch3D {
 	private void draw() throws FileNotFoundException, IOException {
 		svgDrawer.startSVG(false, true);
 
-		originalFaces = objLoader.loadOBJ(dir + objDir + obj, allPoints);
+		originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
 		vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
 		drawAllPoints();
@@ -91,9 +93,7 @@ public class CircleScratch3D {
 
 	private void drawPoint(VertexGeometric p1, double aDegs) {
 		VertexGeometric p2 = p1;
-		boolean adjustForPerspective = false;
 		p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective);
-		boolean occlude = true;
 		if (occlude) {
 			ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective);
 			if (!objLoader.isVertexVisible(faces, p2)) {
@@ -116,7 +116,7 @@ public class CircleScratch3D {
 	}
 
 	private void drawArc(double x, double y, double z, double aDegs, VertexGeometric p) {
-		double sc = scaleMain * 0.4;
+		double sc = scaleMain * scaleObject;
 
 		double xd = x * sc;
 		double yd = y * sc;
@@ -143,10 +143,21 @@ public class CircleScratch3D {
 		double yOff = cy - (yP2 + yc);
 
 		double a1 = offAng + aDegs + arcAngHalf;
-		double a2 = offAng + aDegs - arcAngHalf;
-
+		double a2= offAng + aDegs - arcAngHalf;
 		String sb = svgDrawer.addArc(xOff, yOff, rad, a1, a2);
 		svgDrawer.writeToSVG(sb);
+
+//		double a1 = offAng + aDegs + arcAngHalf+arcAngHalf2;
+//		double a2= offAng + aDegs + arcAngHalf-arcAngHalf2;
+//		String sb = svgDrawer.addArc(xOff, yOff, rad, a1, a2);
+//		svgDrawer.writeToSVG(sb);
+//
+//		//double a2 = offAng + aDegs - arcAngHalf;
+//		a1 = offAng + aDegs - arcAngHalf+arcAngHalf2;
+//		a2= offAng + aDegs - arcAngHalf-arcAngHalf2;
+//		sb = svgDrawer.addArc(xOff, yOff, rad, a1, a2);
+//		svgDrawer.writeToSVG(sb);
+
 
 	}
 
