@@ -88,6 +88,9 @@ public class SvgDrawer {
 	}
 
 	void startSVG(boolean square, boolean circle) {
+		startSVG(square, circle, 1, 0.5, 0.125);
+	}
+	void startSVG(boolean square, boolean circle, int times, double radFIn, double radFOut) {
 		this.square = square;
 		this.circle = circle;
 		if (splitSVG) {
@@ -123,8 +126,10 @@ public class SvgDrawer {
 			writer.println("M" + sqOff + " " + (dd - sqOff) + " L" + sqOff + " " + (dd) + " L" + sqOff2 + " " + dd);
 			writer.println("M" + (dd - sqOff) + " " + dd + " L" + dd + " " + dd + " L" + (dd) + " " + (dd - sqOff));
 		} else if (circle) {
-			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.5)));
-			writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * 0.1)));
+			for (int i=0; i<times; i++) {
+				writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
+				writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFIn)));
+			}
 		}
 
 	}
@@ -149,6 +154,14 @@ public class SvgDrawer {
 		return new VertexGeometric(x, y, 0);
 	}
 
+	VertexGeometric polarToCartesian(double centerX, double centerY, double radiusX, double radiusY, double angleInDegrees) {
+		double angleInRadians = Math.toRadians(angleInDegrees);
+		float x = (float) (centerX + (radiusX * Math.cos(angleInRadians)));
+		float y = (float) (centerY + (radiusY * Math.sin(angleInRadians))); // -
+
+		return new VertexGeometric(x, y, 0);
+	}
+
 	String addArc(double cx, double cy, double radius, double startAngle, double endAngle) {
 
 		VertexGeometric start = polarToCartesian(cx, cy, radius, startAngle);
@@ -158,6 +171,23 @@ public class SvgDrawer {
 
 		String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radius) + " " + formatD(radius)
 				+ " 0" + " " + largeArcFlag + " " + "0" + " " + formatD(end.x) + " " + formatD(end.y);
+
+		if ((int) start.x == 38 && (int) start.y == 956) {
+			boolean a = false;
+		}
+
+		return d;
+	}
+
+	String addArc(double cx, double cy, double radiusX, double radiusY, double startAngle, double endAngle) {
+
+		VertexGeometric start = polarToCartesian(cx, cy, radiusX, radiusY, startAngle);
+		VertexGeometric end = polarToCartesian(cx, cy, radiusX, radiusY, endAngle);
+
+		String largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
+
+		String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radiusX) + " " + formatD(radiusY)
+				+ " 1" + " " + largeArcFlag + " " + "1" + " " + formatD(end.x) + " " + formatD(end.y);
 
 		if ((int) start.x == 38 && (int) start.y == 956) {
 			boolean a = false;

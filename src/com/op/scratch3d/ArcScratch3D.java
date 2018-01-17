@@ -43,16 +43,17 @@ public class ArcScratch3D extends Base {
     // private String obj = "test-pyramidSq";
     //private String obj = "KD-TorusKnot2";
     //private String obj = "KD-TorusKnot3";
-    private String obj = "KD-Icosphere";
+    //private String obj = "KD-Icosphere";
+    private String obj = "KD-Ripple";
     //private String obj = "KD-NJoint";
     //private String obj = "SW_Vader";
     //private String obj = "SW_Trooper";
     //private String obj = "SW-DeathStarFine";
 
     boolean doClip = true;
-    boolean selectedOnly = true;
+    boolean selectedOnly = false;
     boolean adjustForPerspective = true;
-    boolean occlude = false;
+    boolean occlude = true;
 
     private String src = "ARCscratch3D-" + obj;
     double dpi = 300;
