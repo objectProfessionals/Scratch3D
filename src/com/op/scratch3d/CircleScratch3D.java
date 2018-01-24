@@ -16,7 +16,8 @@ public class CircleScratch3D extends Base {
     // private String obj = "Heart";
     // private String obj = "cubeHiEdges";
     //private String obj = "cubeLow";
-    private String obj = "cubeHi";
+    //private String obj = "cubeHi";
+    private String obj = "SP-Star";
     //private String obj = "cylinderHi";
     //private String obj = "001";
     // private String obj = "cubeTris";
@@ -36,8 +37,8 @@ public class CircleScratch3D extends Base {
     private double hmm = scalemm * 3;
     private double w = dpi * (wmm / mm2in);
     private double h = dpi * (hmm / mm2in);
-    private double cx = (int) (w / 2.0);
-    private double cy = (int) (h / 2.0);
+    private double cx = (w / 2.0);
+    private double cy = (h / 2.0);
     double scaleMain = dpi * (scalemm / mm2in);
     double scaleObject = 0.3;
 
@@ -63,7 +64,7 @@ public class CircleScratch3D extends Base {
     }
 
     private void draw() throws FileNotFoundException, IOException {
-        svgDrawer.startSVG(false, true, 1, 0.5, 0.125);
+        svgDrawer.startSVG(false, true, 1, 0.125, 0.5);
 
         originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
         vertexTransformer = new VertexTransformer(originalFaces, vanZ);
@@ -76,11 +77,42 @@ public class CircleScratch3D extends Base {
     }
 
     private void drawSpirograph() {
-        double rad = w*0.4;
-        for (double d = 0; d<5; d++) {
-            double rx = 0.5 + 0.5*(d/4);
-            double ry = 1 - 0.5*(d/4);
-            String sb = svgDrawer.addArc(cx, cy, rad*rx, rad*ry, 0, 359.9);
+        double radIn = w * 0.125;
+        double radOut = w * 0.5;
+        double ri = radIn * 1.5;
+        double ro = (radOut + radIn) / 2;
+        double cr = (radOut - radIn) / 2;
+        double i = 0;
+        for (VertexGeometric vg : allPoints) {
+
+            double x = vg.x;
+            double y = vg.y;
+            double vrad = Math.sqrt(x * x + y * y);
+
+            double a = Math.atan2(y, x);
+            double xx = vrad * cr * Math.cos(a);
+            double yy = vrad * cr * Math.sin(a);
+            String sb = svgDrawer.addEllipse(cx + xx, cy - yy, ri, ro, i * 30);
+            svgDrawer.writeToSVG(sb);
+
+            i++;
+            if (i > 11) {
+                break;
+            }
+        }
+    }
+
+    private void drawSpirograph1() {
+        double rmax = 0.5 * w * 0.5;
+        double rmin = 0.5 * w * 0.125;
+        double n = 24;
+        for (double d = 1; d <= n; d++) {
+            double r = rmin * 2 + (rmax - rmin) * d / n;
+            double a = -90 + 360 * d / n;
+            double ca = Math.cos(Math.toRadians(a));
+            double sa = Math.sin(Math.toRadians(a));
+            double off = -rmin * 2 + r;
+            String sb = svgDrawer.addEllipse(cx + off * ca, cy + off * sa, r, r, 0);
             svgDrawer.writeToSVG(sb);
         }
 
