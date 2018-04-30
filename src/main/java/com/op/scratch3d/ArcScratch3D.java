@@ -41,24 +41,31 @@ public class ArcScratch3D extends Base {
     // private String obj = "test-planes";
     // private String obj = "test-z";
     // private String obj = "test-pyramidSq";
-    //private String obj = "KD-TorusKnot2";
+    //private String obj = "KD-TorusKnot1";
     //private String obj = "KD-TorusKnot3";
-    //private String obj = "KD-SPikey";
-    //private String obj = "Pyramid";
-    //private String obj = "Octahedron";
-    //private String obj = "Icosahedron";
-    private String obj = "Dodecahedron";
+    //private String obj = "KD-Spikey";
+    //private String obj = "SP-Tetrahedron";
+    //private String obj = "SP-Cube";
+    //private String obj = "SP-Octahedron";
+    //private String obj = "SP-Dodecahedron";
+    //private String obj = "SP-Icosahedron";
+    //private String obj = "KD-SPH_STRIP";
     //private String obj = "KD-Icosphere";
     //private String obj = "KD-Ripple";
     //private String obj = "KD-NJoint";
     //private String obj = "SW_Vader";
     //private String obj = "SW_Trooper";
-    //private String obj = "SW-DeathStarFine";
+    //private String obj = "SW-TieFull";
+    //private String obj = "MetaBall";
+    //private String obj = "TEXT-ILU";
+    //private String obj = "KD-TorusKnot";
+    //private String obj = "SW-LowPolyTie3";
+    private String obj = "SW-Falcon6";
 
     boolean doClip = true;
-    boolean selectedOnly = true;
+    boolean selectedOnly = false;
     boolean adjustForPerspective = true;
-    boolean occlude = false;
+    boolean occlude = true;
 
     private String src = "ARCscratch3D-" + obj;
     double dpi = 90;
@@ -72,7 +79,7 @@ public class ArcScratch3D extends Base {
     private double w = dpi * (wmm / mm2in);
     private double h = dpi * (hmm / mm2in);
 
-    double ang = 60;
+    double ang = 90;
     double num = 10;//20
     double angInc = ang / (4 * num);
 
@@ -87,7 +94,7 @@ public class ArcScratch3D extends Base {
     private static ArcScratch3D scratch3D = new ArcScratch3D();
 
     double vanZ = 20;//10
-    double minRadF = 0.95;
+    double minRadF = 0.05;
 
     ObjLoader objLoader = new ObjLoader();
     SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h);
@@ -142,7 +149,7 @@ public class ArcScratch3D extends Base {
                 // double x = vg.x;
                 // double y = vg.y;
                 double z = vg.z;
-                double rad = (1 - minRadF) + minRadF * (Math.abs(z));
+                double rad = (minRadF) + (1-minRadF) * (Math.abs(z));
 
                 if (vg.defs == null) {
                     vg.defs = new ArcScratchDefs();

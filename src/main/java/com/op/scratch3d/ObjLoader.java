@@ -83,7 +83,8 @@ public class ObjLoader {
 		}
 		path.closePath();
 
-		Point2D pp = new Point2D.Double(p.x * 0.999, p.y * 0.999);
+		double insideF = 0.999;
+		Point2D pp = new Point2D.Double(p.x * insideF, p.y * insideF);
 		return path.contains(pp);
 	}
 
