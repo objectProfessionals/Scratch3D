@@ -129,8 +129,9 @@ public class SvgDrawer {
             writer.println("M" + (dd - sqOff) + " " + dd + " L" + dd + " " + dd + " L" + (dd) + " " + (dd - sqOff));
         } else if (circle) {
             for (int i = 0; i < times; i++) {
-                writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
+                int d = 100;
                 writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFIn)));
+                writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
             }
         }
 
@@ -204,6 +205,17 @@ public class SvgDrawer {
         return d;
     }
 
+    String addLine(boolean first, double x, double y) {
+
+        String d = "";
+        if (first) {
+            d = "M " + formatD2(x) + " " + formatD2(y) + " ";
+        } else {
+            d = d + "L " + formatD2(x) + " " + formatD2(y) + " ";
+        }
+        return d;
+    }
+
     String addEllipseOLD(double cx, double cy, double radiusX, double radiusY, double rotAng) {
 
         double dx = radiusX * Math.cos(Math.toRadians(rotAng));
@@ -237,10 +249,21 @@ public class SvgDrawer {
 
     String addCircle(double cx, double cy, double radius) {
         String largeArc = " 1 ";
-        VertexGeometric start = polarToCartesian(cx, cy, radius, 359.99);
+        double endAng = 359.99;
+        VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
         VertexGeometric end = polarToCartesian(cx, cy, radius, 0);
         String d = "M" + formatD(start.x) + " " + formatD(start.y) + " A " + formatD(radius) + " " + formatD(radius)
                 + " 0" + largeArc + "0 " + formatD(end.x) + " " + formatD(end.y);
+        return d;
+    }
+
+    String addCircleD2(double cx, double cy, double radius) {
+        String largeArc = " 1 ";
+        double endAng = 358;
+        VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
+        VertexGeometric end = polarToCartesian(cx, cy, radius, 0);
+        String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
+                + " 1" + largeArc + "0 " + formatD2(end.x) + " " + formatD2(end.y);
         return d;
     }
 

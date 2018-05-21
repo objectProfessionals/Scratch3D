@@ -12,12 +12,14 @@ public class CircleScratch3D extends Base {
     private String objDir = hostDir + "objFiles/";
 
     // private String obj = "tie";
-    // private String obj = "cubeHiSq";
+//    private String obj = "cubeHi";
+    //private String obj = "CrossHairs";
+    private String obj = "point";
     // private String obj = "Heart";
     // private String obj = "cubeHiEdges";
     //private String obj = "cubeLow";
     //private String obj = "cubeHi";
-    private String obj = "SP-Star";
+    //private String obj = "SP-Star";
     //private String obj = "cylinderHi";
     //private String obj = "001";
     // private String obj = "cubeTris";
@@ -48,14 +50,18 @@ public class CircleScratch3D extends Base {
     ObjLoader objLoader = new ObjLoader();
     SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h);
     VertexTransformer vertexTransformer;
+    ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
 
+    private double radSc = 50;
     private int totRotAng = 360;
-    private double incRotAng = 30; // 6;
-    private double arcAngHalf = 15;
+    private double numFrames = 12;
+    private double incRotAng = totRotAng / numFrames; // 6;
+    private double arcAngHalf = incRotAng / 2;//3
     private double arcAngHalf2 = 10;
     boolean adjustForPerspective = false;
-    boolean occlude = true;
+    boolean occlude = false;
     boolean multi = false;
+    boolean selectedOnly = true;
 
     private static CircleScratch3D scratch3D = new CircleScratch3D();
 
@@ -68,10 +74,13 @@ public class CircleScratch3D extends Base {
 
         originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
         vertexTransformer = new VertexTransformer(originalFaces, vanZ);
+        if (selectedOnly) {
+            selectedVerts = objLoader.loadOBJSelectedVerts(objDir + obj + "_sel");
+        }
 
-        //drawAllPoints();
+        drawAllPoints();
         // drawAllPointsAsContinuosLines();
-        drawSpirograph();
+        //drawSpirograph();
 
         svgDrawer.endSVG();
     }
@@ -124,8 +133,8 @@ public class CircleScratch3D extends Base {
         String sd2 = svgDrawer.addLine(cx - 10, cy + 10, cx + 10, cy - 10);
         svgDrawer.writeToSVG(sd2);
 
-        for (double a = 0; a < totRotAng; a = a + incRotAng) {
-            for (VertexGeometric p : allPoints) {
+        for (VertexGeometric p : allPoints) {
+            for (double a = 0; a < totRotAng; a = a + incRotAng) {
                 drawPoint(p, a);
             }
             // if (a > 60)
@@ -164,13 +173,18 @@ public class CircleScratch3D extends Base {
             }
         }
 
+        if (selectedOnly && !selectedVertsContains(p1)) {
+            return;
+        }
+
+
         // if (occlude) {
         // if (!objLoader.isVertexVisible(faces, p2)) {
         // return;
         // }
         // }
 
-        double zOff = 5;
+        double zOff = 0;
         double xx = p2.x;
         double yy = p2.y;
         double zz = p2.z + zOff;
@@ -207,7 +221,8 @@ public class CircleScratch3D extends Base {
 
     }
 
-    private void drawArc(double x, double y, double z, double aDegs) {
+    private void drawArc(double x, double y, double z, double ang) {
+        double aDegs = -ang;
         double sc = scaleMain * scaleObject;
 
         double xd = x * sc;
@@ -224,7 +239,7 @@ public class CircleScratch3D extends Base {
         double yP2 = rad2 * Math.sin(a);
 
         double zOff = 0.05;
-        double rad = scaleMain * zOff + Math.abs(scaleMain * zOff * (z));
+        double rad = scaleMain * zOff + Math.abs(radSc * scaleMain * zOff * (z));
 
         double offAng = z > 0 ? 90 : 270;
         double aa = Math.toRadians(offAng + aDegs);
@@ -368,6 +383,15 @@ public class CircleScratch3D extends Base {
             String sb = svgDrawer.lineTo(cx + xOff, cy - yOff);
             svgDrawer.writeToSVG(sb);
         }
+    }
+
+    private boolean selectedVertsContains(VertexGeometric vg) {
+        for (VertexGeometric v : selectedVerts) {
+            if (objLoader.equals(vg, v)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

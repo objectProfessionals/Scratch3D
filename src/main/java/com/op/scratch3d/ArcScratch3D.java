@@ -23,7 +23,7 @@ public class ArcScratch3D extends Base {
     //private String obj = "cubeLow";
     // private String obj = "cubeEdgeCut";
     // private String obj = "cubeCuts";
-    // private String obj = "cubeHi";
+//    private String obj = "cubeHi";
     // private String obj = "spheres";
     // private String obj = "Falcon";
     // private String obj = "cubeLowWithEdges";
@@ -60,7 +60,10 @@ public class ArcScratch3D extends Base {
     //private String obj = "TEXT-ILU";
     //private String obj = "KD-TorusKnot";
     //private String obj = "SW-LowPolyTie3";
-    private String obj = "SW-Falcon6";
+    //private String obj = "SW-Falcon6";
+//    private String obj = "SW-Tie";
+    //private String obj = "SW-TieLow";
+    private String obj = "SW-TrooperPlane";
 
     boolean doClip = true;
     boolean selectedOnly = false;
