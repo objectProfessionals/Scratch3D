@@ -63,10 +63,11 @@ public class ArcScratch3D extends Base {
     //private String obj = "SW-Falcon6";
 //    private String obj = "SW-Tie";
     //private String obj = "SW-TieLow";
-    private String obj = "SW-TrooperPlane";
+    //private String obj = "SW-TrooperPlane";
+    private String obj = "Gear";
 
     boolean doClip = true;
-    boolean selectedOnly = false;
+    boolean selectedOnly = true;
     boolean adjustForPerspective = true;
     boolean occlude = true;
 
@@ -207,6 +208,7 @@ public class ArcScratch3D extends Base {
             }
         } // all angs
 
+        int c = 0;
         ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
         for (Face face : originalFaces) {
             for (FaceVertex fv : face.vertices) {
@@ -221,6 +223,8 @@ public class ArcScratch3D extends Base {
 
                 ArrayList<Boolean> arcs = vg.defs.arcs;
                 drawVisibleArcs(arcs, vg);
+                System.out.println("c="+c);
+                c++;
             }
         }
     }

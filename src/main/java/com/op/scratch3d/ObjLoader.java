@@ -26,6 +26,8 @@ public class ObjLoader {
         Parse obj0 = new Parse(builder, dirAndFile + ".obj");
         groups = obj0.builder.getGroups();
 
+//        allPoints.addAll(obj0.builder.getVertices());
+
         ArrayList<VertexGeometric> v0 = obj0.builder.getVertices();
         for (VertexGeometric v : v0) {
             // Point3f p = new Point3f(v.x, -v.z, v.y);

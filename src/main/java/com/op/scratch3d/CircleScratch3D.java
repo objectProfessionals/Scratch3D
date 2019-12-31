@@ -14,16 +14,17 @@ public class CircleScratch3D extends Base {
     // private String obj = "tie";
 //    private String obj = "cubeHi";
     //private String obj = "CrossHairs";
-    private String obj = "point";
+    //private String obj = "point";
     // private String obj = "Heart";
     // private String obj = "cubeHiEdges";
-    //private String obj = "cubeLow";
+    private String obj = "cubeLow";
     //private String obj = "cubeHi";
     //private String obj = "SP-Star";
     //private String obj = "cylinderHi";
     //private String obj = "001";
     // private String obj = "cubeTris";
     // private String obj = "coneLowWithEdges";
+     //private String obj = "coneHi2";
     // private String obj = "sphereMed";
     // private String obj = "DeathStar";
     // private String obj = "test-planes";
@@ -52,16 +53,16 @@ public class CircleScratch3D extends Base {
     VertexTransformer vertexTransformer;
     ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
 
-    private double radSc = 50;
+    private double radSc = 20; // max rad for each arc
     private int totRotAng = 360;
-    private double numFrames = 12;
+    private double numFrames = 360;
     private double incRotAng = totRotAng / numFrames; // 6;
     private double arcAngHalf = incRotAng / 2;//3
     private double arcAngHalf2 = 10;
     boolean adjustForPerspective = false;
-    boolean occlude = false;
+    boolean occlude = true;
     boolean multi = false;
-    boolean selectedOnly = true;
+    boolean selectedOnly = false;
 
     private static CircleScratch3D scratch3D = new CircleScratch3D();
 
@@ -165,9 +166,9 @@ public class CircleScratch3D extends Base {
 
     private void drawPoint(VertexGeometric p1, double aDegs) {
         VertexGeometric p2 = p1;
-        p2 = vertexTransformer.transformVertex(p1, aDegs, adjustForPerspective);
+        p2 = vertexTransformer.rotateVertexY(p1, aDegs, adjustForPerspective);
         if (occlude) {
-            ArrayList<Face> faces = vertexTransformer.getTransformedFaces(aDegs, adjustForPerspective);
+            ArrayList<Face> faces = vertexTransformer.getTransformedFacesRotateY(aDegs, adjustForPerspective);
             if (!objLoader.isVertexVisible(faces, p2)) {
                 return;
             }

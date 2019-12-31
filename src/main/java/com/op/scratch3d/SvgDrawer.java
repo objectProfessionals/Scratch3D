@@ -22,13 +22,21 @@ public class SvgDrawer {
     public ArrayList<ScratchArc> allScratches = new ArrayList<ScratchArc>();
     boolean square;
     boolean circle;
-    int sqOff = 50;
+    double sqOff = 50;
 
     public SvgDrawer(String opDir, String src, double w, double h) {
         this.opDir = opDir;
         this.src = src;
         this.w = w;
         this.h = h;
+    }
+
+    public SvgDrawer(String opDir, String src, double w, double h, double off) {
+        this.opDir = opDir;
+        this.src = src;
+        this.w = w;
+        this.h = h;
+        this.sqOff = off;
     }
 
     void drawAllScratches() {
@@ -44,6 +52,11 @@ public class SvgDrawer {
         if (!allScratches.contains(arc)) {
             allScratches.add(arc);
         }
+    }
+
+    public void drawCircle(double xc, double yc, double rad) {
+        String c = "<circle cx=\"" + formatD2(xc) + "\" cy=\"" + formatD2(yc) + "\" r=\"" + formatD2(rad) + "\" />";
+        writeToSVG(c);
     }
 
     void drawAndAddArc(double xc, double yc, double rad, double angSt, double angEn) {
@@ -88,8 +101,34 @@ public class SvgDrawer {
         split();
     }
 
-    void startSVG(boolean square, boolean circle) {
+    public void startSVG(boolean square, boolean circle) {
         startSVG(square, circle, 1, 0.5, 0.125);
+    }
+
+    public void startSimpleSVG() {
+        try {
+            writer = new PrintWriter(opDir + src + "_" + svgFileCount + ".svg", "UTF-8");
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        writer.println("<svg width=\"" + ((int) w) + "\" height=\"" + ((int) (h))
+                + "\" xmlns=\"http://www.w3.org/2000/svg\">");
+        writer.println("");
+        writer.println("<path d=\"");
+        int sq = 1;
+        int ddx = (int) (w - sq);
+        int ddy = (int) (h - sq);
+        double sq2 = sq * 2;
+        writer.println("M" + sq + " " + sq2 + " L" + sq + " " + sq + " L" + sq2 + " " + sq);
+        writer.println("M" + (ddx - sq) + " " + sq + " L" + ddx + " " + sq + " L" + ddx + " " + sq2);
+
+        writer.println("M" + sq + " " + (ddy - sq) + " L" + sq + " " + ddy + " L" + sq2 + " " + ddy);
+        writer.println("M" + (ddx - sq) + " " + ddy + " L" + ddx + " " + ddy + " L" + ddx + " " + (ddy - sq));
     }
 
     void startSVG(boolean square, boolean circle, int times, double radFIn, double radFOut) {
@@ -117,19 +156,22 @@ public class SvgDrawer {
         // stroke=\"blue\" fill=\"none\"/>");
         writer.println("<path d=\"");
         if (square) {
-            // writer.println("M" + sqOff + " " + sqOff + " L" + dd + " " +
-            // sqOff + " L" + dd + " " + dd + " L" + sqOff
-            // + " " + dd + " Z");
+//            double sqOff2 = sqOff * 2;
+//            writer.println("M" + sqOff + " " + sqOff2 + " L" + sqOff + " " + sqOff + " L" + sqOff2 + " " + sqOff);
+//            writer.println("M" + (dd - sqOff) + " " + sqOff + " L" + dd + " " + sqOff + " L" + dd + " " + sqOff2);
+//
+//            writer.println("M" + sqOff + " " + (dd - sqOff) + " L" + sqOff + " " + (dd) + " L" + sqOff2 + " " + dd);
+//            writer.println("M" + (dd - sqOff) + " " + dd + " L" + dd + " " + dd + " L" + (dd) + " " + (dd - sqOff));
 
-            double sqOff2 = sqOff * 2;
-            writer.println("M" + sqOff + " " + sqOff2 + " L" + sqOff + " " + sqOff + " L" + sqOff2 + " " + sqOff);
-            writer.println("M" + (dd - sqOff) + " " + sqOff + " L" + dd + " " + sqOff + " L" + dd + " " + sqOff2);
+            dd = (int) w;
+            writer.println("M" + 0 + " " + sqOff + " L" + 0 + " " + 0 + " L" + sqOff + " " + 0);
+            writer.println("M" + (dd - 0) + " " + 0 + " L" + dd + " " + 0 + " L" + dd + " " + sqOff);
 
-            writer.println("M" + sqOff + " " + (dd - sqOff) + " L" + sqOff + " " + (dd) + " L" + sqOff2 + " " + dd);
+            writer.println("M" + 0 + " " + (dd - 0) + " L" + 0 + " " + (dd) + " L" + sqOff + " " + dd);
             writer.println("M" + (dd - sqOff) + " " + dd + " L" + dd + " " + dd + " L" + (dd) + " " + (dd - sqOff));
-        } else if (circle) {
+        }
+        if (circle) {
             for (int i = 0; i < times; i++) {
-                int d = 100;
                 writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFIn)));
                 writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
             }
@@ -137,7 +179,15 @@ public class SvgDrawer {
 
     }
 
-    void endSVG() {
+    public void endSimpleSVG() {
+        String col = "blue";
+        writer.println("\" stroke=\"" + col + "\" fill=\"none\" />");
+        writer.println("</svg>");
+        writer.close();
+        System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg numSvgs=" + numSvgs);
+    }
+
+    public void endSVG() {
         String col = "blue";
         writer.println("\" stroke=\"" + col + "\" fill=\"none\" />");
         // writer.println("<!-- radmm = " + scalemm + " -->");
@@ -180,6 +230,54 @@ public class SvgDrawer {
         if ((int) start.x == 38 && (int) start.y == 956) {
             boolean a = false;
         }
+
+        return d;
+    }
+
+    String addWeightedLines(double cx, double cy, double radius, double startAngle, double endAngle) {
+
+        double midAngle = startAngle + ((endAngle - startAngle)/2);
+        VertexGeometric mid = polarToCartesian(cx, cy, radius, midAngle);
+        double alpha = endAngle - midAngle;
+
+        double scratchLen = radius * Math.tan(Math.toRadians(alpha));
+
+        double dx10 = mid.x + scratchLen * Math.cos(Math.toRadians(90 + midAngle));
+        double dy10 = mid.y + scratchLen * Math.sin(Math.toRadians(90 + midAngle));
+        double dx20 = mid.x + scratchLen * Math.cos(Math.toRadians(midAngle-90));
+        double dy20 = mid.y + scratchLen * Math.sin(Math.toRadians(midAngle-90));
+        String d = "M" + formatD2(dx10) + " " + formatD2(dy10) + " L " + formatD2(dx20) + " " + formatD2(dy20);
+
+        double c30 = Math.cos(Math.toRadians(30));
+        double dx130 = mid.x + c30*scratchLen * Math.cos(Math.toRadians(90 + midAngle));
+        double dy130 = mid.y + c30*scratchLen * Math.sin(Math.toRadians(90 + midAngle));
+        double dx230 = mid.x + c30*scratchLen * Math.cos(Math.toRadians(midAngle-90));
+        double dy230 = mid.y + c30*scratchLen * Math.sin(Math.toRadians(midAngle-90));
+        d = d + " M" + formatD2(dx130) + " " + formatD2(dy130) + " L " + formatD2(dx230) + " " + formatD2(dy230);
+
+        double c60 = Math.cos(Math.toRadians(60));
+        double dx160 = mid.x + c60*scratchLen * Math.cos(Math.toRadians(90 + midAngle));
+        double dy160 = mid.y + c60*scratchLen * Math.sin(Math.toRadians(90 + midAngle));
+        double dx260 = mid.x + c60*scratchLen * Math.cos(Math.toRadians(midAngle-90));
+        double dy260 = mid.y + c60*scratchLen * Math.sin(Math.toRadians(midAngle-90));
+        d = d + " M" + formatD2(dx160) + " " + formatD2(dy160) + " L " + formatD2(dx260) + " " + formatD2(dy260);
+
+        return d;
+    }
+
+    String addLines(double cx, double cy, double radius, double startAngle, double endAngle) {
+
+        double midAngle = startAngle + ((endAngle - startAngle)/2);
+        VertexGeometric mid = polarToCartesian(cx, cy, radius, midAngle);
+        double alpha = endAngle - midAngle;
+
+        double scratchLen = radius * Math.tan(Math.toRadians(alpha));
+
+        double dx10 = mid.x + scratchLen * Math.cos(Math.toRadians(90 + midAngle));
+        double dy10 = mid.y + scratchLen * Math.sin(Math.toRadians(90 + midAngle));
+        double dx20 = mid.x + scratchLen * Math.cos(Math.toRadians(midAngle-90));
+        double dy20 = mid.y + scratchLen * Math.sin(Math.toRadians(midAngle-90));
+        String d = "M" + formatD2(dx10) + " " + formatD2(dy10) + " L " + formatD2(dx20) + " " + formatD2(dy20);
 
         return d;
     }
@@ -247,7 +345,21 @@ public class SvgDrawer {
         return false;
     }
 
-    String addCircle(double cx, double cy, double radius) {
+    public void writeCircle(double cx, double cy, double radius) {
+        writer.println(addCircle(cx, cy, radius));
+        numSvgs++;
+    }
+
+    public void writeCircleD2(double cx, double cy, double radius) {
+        writer.println(addCircleD2(cx, cy, radius));
+        numSvgs++;
+    }
+    void writeLine(double x, double y, double x2, double y2) {
+        writer.println(addLine(x, y, x2, y2));
+        numSvgs++;
+    }
+
+    public String addCircle(double cx, double cy, double radius) {
         String largeArc = " 1 ";
         double endAng = 359.99;
         VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
@@ -265,6 +377,21 @@ public class SvgDrawer {
         String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
                 + " 1" + largeArc + "0 " + formatD2(end.x) + " " + formatD2(end.y);
         return d;
+    }
+
+    String addCircleD2(double cx, double cy, double radius, double startAng, double endAng) {
+        String largeArc = Math.abs(endAng - startAng) <= 180 ? " 0 " : " 1 ";
+        VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
+        VertexGeometric end = polarToCartesian(cx, cy, radius, startAng);
+        String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
+                + " 1" + largeArc + "0 " + formatD2(end.x) + " " + formatD2(end.y);
+        return d;
+    }
+
+    double[] getCircleD2(double cx, double cy, double radius, double startAng, double endAng) {
+        VertexGeometric mid = polarToCartesian(cx, cy, radius, (startAng + endAng)/2);
+        double[] arr = {formatD2(mid.x), formatD2(mid.y)};
+        return arr;
     }
 
     String addLine(double x1, double y1, double x2, double y2) {
