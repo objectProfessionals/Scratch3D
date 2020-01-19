@@ -172,8 +172,8 @@ public class SvgDrawer {
         }
         if (circle) {
             for (int i = 0; i < times; i++) {
-                writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFIn)));
-                writer.println(addCircle((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
+                writer.println(addCircleD2((int) (w / 2), (int) (h / 2), (int) (w * radFIn)));
+                writer.println(addCircleD2((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
             }
         }
 
@@ -369,9 +369,9 @@ public class SvgDrawer {
         return d;
     }
 
-    String addCircleD2(double cx, double cy, double radius) {
+    public String addCircleD2(double cx, double cy, double radius) {
         String largeArc = " 1 ";
-        double endAng = 358;
+        double endAng = 360;
         VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
         VertexGeometric end = polarToCartesian(cx, cy, radius, 0);
         String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
@@ -380,11 +380,12 @@ public class SvgDrawer {
     }
 
     String addCircleD2(double cx, double cy, double radius, double startAng, double endAng) {
-        String largeArc = Math.abs(endAng - startAng) <= 180 ? " 0 " : " 1 ";
+        String largeArc = Math.abs(endAng - startAng) <= 180 ? " 0" : " 1";
+        String sweep = " 0 "; //endAng > startAng ? " 0 " : " 1 ";
         VertexGeometric start = polarToCartesian(cx, cy, radius, endAng);
         VertexGeometric end = polarToCartesian(cx, cy, radius, startAng);
         String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
-                + " 1" + largeArc + "0 " + formatD2(end.x) + " " + formatD2(end.y);
+                + " 1" + largeArc + sweep + formatD2(end.x) + " " + formatD2(end.y);
         return d;
     }
 

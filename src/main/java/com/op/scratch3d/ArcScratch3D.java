@@ -21,9 +21,10 @@ public class ArcScratch3D extends Base {
 
     // private String obj = "earth";
     //private String obj = "cubeLow";
-    // private String obj = "cubeEdgeCut";
+    //private String obj = "cubeEdgeCut";
+    //private String obj = "CubeCentered";
     // private String obj = "cubeCuts";
-//    private String obj = "cubeHi";
+    //private String obj = "cubeHi";
     // private String obj = "spheres";
     // private String obj = "Falcon";
     // private String obj = "cubeLowWithEdges";
@@ -59,33 +60,34 @@ public class ArcScratch3D extends Base {
     //private String obj = "MetaBall";
     //private String obj = "TEXT-ILU";
     //private String obj = "KD-TorusKnot";
-    //private String obj = "SW-LowPolyTie3";
+    private String obj = "SW-LowPolyTie3";
     //private String obj = "SW-Falcon6";
-//    private String obj = "SW-Tie";
+    //private String obj = "SW-Tie";
     //private String obj = "SW-TieLow";
     //private String obj = "SW-TrooperPlane";
-    private String obj = "Gear";
+    //private String obj = "Gear";
 
-    boolean doClip = true;
+    double sqOffF = 0.02;
+    boolean doClipToSqOff = true;
     boolean selectedOnly = true;
     boolean adjustForPerspective = true;
     boolean occlude = true;
 
     private String src = "ARCscratch3D-" + obj;
-    double dpi = 90;
+    double dpi = 200;
     double mm2in = 25.4;
-    double scalemm = 127;
+    double scalemm = 100; //127;
     double scaleMain = dpi * (scalemm / mm2in);
-    double sf = 1.1;//1.1
+    double sf = 0.3;//1.1
 
-    private double wmm = scalemm * 3;
-    private double hmm = scalemm * 3;
+    private double wmm = scalemm;
+    private double hmm = scalemm;
     private double w = dpi * (wmm / mm2in);
     private double h = dpi * (hmm / mm2in);
 
     double ang = 90;
-    double num = 10;//20
-    double angInc = ang / (4 * num);
+    double num = 80;//20
+    double angInc = ang / num;
 
     private int cx = (int) (w / 2.0);
     private int cy = (int) (h / 2.0);
@@ -101,7 +103,7 @@ public class ArcScratch3D extends Base {
     double minRadF = 0.05;
 
     ObjLoader objLoader = new ObjLoader();
-    SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h);
+    SvgDrawer svgDescriber = new SvgDrawer(opDir, src, w, h, w * sqOffF);
     boolean savePNG = false;
     private VertexTransformer vertexTransformer;
 
@@ -153,7 +155,7 @@ public class ArcScratch3D extends Base {
                 // double x = vg.x;
                 // double y = vg.y;
                 double z = vg.z;
-                double rad = (minRadF) + (1-minRadF) * (Math.abs(z));
+                double rad = (minRadF) + (1 - minRadF) * (Math.abs(z));
 
                 if (vg.defs == null) {
                     vg.defs = new ArcScratchDefs();
@@ -196,11 +198,11 @@ public class ArcScratch3D extends Base {
                 VertexGeometric rotvg = orig2rot.get(origvg);
                 boolean clipped = isVertexClipped(rotvg, origvg.defs, a);
                 boolean visible = objLoader.isVertexVisible(rotatedFaces, rotvg);
-                if ((!occlude && (doClip && !clipped))) {
+                if ((!occlude && (doClipToSqOff && !clipped))) {
                     origvg.defs.arcs.add(true);
-                } else if ((!occlude && (doClip && clipped))) {
+                } else if ((!occlude && (doClipToSqOff && clipped))) {
                     origvg.defs.arcs.add(false);
-                } else if ((doClip && clipped) || !visible) {
+                } else if ((doClipToSqOff && clipped) || !visible) {
                     origvg.defs.arcs.add(false);
                 } else {
                     origvg.defs.arcs.add(true);
@@ -223,7 +225,7 @@ public class ArcScratch3D extends Base {
 
                 ArrayList<Boolean> arcs = vg.defs.arcs;
                 drawVisibleArcs(arcs, vg);
-                System.out.println("c="+c);
+                System.out.println("c=" + c);
                 c++;
             }
         }

@@ -17,7 +17,7 @@ public class CircleScratch3D extends Base {
     //private String obj = "point";
     // private String obj = "Heart";
     // private String obj = "cubeHiEdges";
-    private String obj = "cubeLow";
+    //private String obj = "cubeLow";
     //private String obj = "cubeHi";
     //private String obj = "SP-Star";
     //private String obj = "cylinderHi";
@@ -31,6 +31,7 @@ public class CircleScratch3D extends Base {
     // private String obj = "test-z";
     // private String obj = "test-pyramidSq";
     //private String obj = "KD-Triangle";
+    private String obj = "Dodecahedron2";
 
     private String src = "CIRscratch3D-" + obj;
     double dpi = 90;
@@ -43,7 +44,7 @@ public class CircleScratch3D extends Base {
     private double cx = (w / 2.0);
     private double cy = (h / 2.0);
     double scaleMain = dpi * (scalemm / mm2in);
-    double scaleObject = 0.3;
+    double scaleObject = 0.4;
 
     ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
     ArrayList<Face> originalFaces = new ArrayList<Face>();
@@ -53,11 +54,11 @@ public class CircleScratch3D extends Base {
     VertexTransformer vertexTransformer;
     ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
 
-    private double radSc = 20; // max rad for each arc
+    private double radSc = 50; // max rad for each arc
     private int totRotAng = 360;
-    private double numFrames = 360;
+    private double numFrames = 12;
     private double incRotAng = totRotAng / numFrames; // 6;
-    private double arcAngHalf = incRotAng / 2;//3
+    private double arcAngHalf = incRotAng / 4;//3
     private double arcAngHalf2 = 10;
     boolean adjustForPerspective = false;
     boolean occlude = true;

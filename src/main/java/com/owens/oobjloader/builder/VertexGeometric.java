@@ -2,12 +2,12 @@ package com.owens.oobjloader.builder;
 
 import java.util.Objects;
 
-public class VertexGeometric {
+public class VertexGeometric implements Comparable<VertexGeometric> {
 
 	public float x = 0;
 	public float y = 0;
 	public float z = 0;
-	public ArcScratchDefs defs = new ArcScratchDefs();
+	public ArcScratchDefs defs;
 
 	public VertexGeometric(float x, float y, float z) {
 		this.x = x;
@@ -32,5 +32,10 @@ public class VertexGeometric {
 	@Override
 	public int hashCode() {
 		return toString().hashCode();
+	}
+
+	@Override
+	public int compareTo(VertexGeometric o) {
+		return (int) z;
 	}
 }

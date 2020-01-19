@@ -6,14 +6,14 @@ import java.io.IOException;
 public class SpiroScratch3D extends Base {
     private String opDir = hostDir + "output/";
 
-    private String obj = "Spiral";
+    private String obj = "TestCircles";
 
     private String src = "SPIRscratch3D-" + obj;
-    double dpi = 90;
+    double dpi = 300;
     double mm2in = 25.4;
     double scalemm = 100;
-    private double wmm = scalemm * 3;
-    private double hmm = scalemm * 3;
+    private double wmm = scalemm;
+    private double hmm = scalemm;
     private double w = dpi * (wmm / mm2in);
     private double h = dpi * (hmm / mm2in);
     private double cx = (w / 2.0);
@@ -34,11 +34,28 @@ public class SpiroScratch3D extends Base {
     }
 
     private void draw() throws FileNotFoundException, IOException {
-        svgDrawer.startSVG(false, true, 1, 0.125, 0.5);
+        svgDrawer.startSVG(false, true, 1, 0.1, 0.5);
 
-        drawSpirograph();
+        //drawSpirograph();
+        drawTestCircles();
 
         svgDrawer.endSVG();
+    }
+
+    private void drawTestCircles() {
+        double r1=w*0.1;
+        double num = 20;
+        for (double i=1; i< 10; i++) {
+            double r = r1 +  (i/num)*w*(0.5-0.1);
+            String c = svgDrawer.addCircleD2(cx, cy, r, 0, 359.9);
+            svgDrawer.writeToSVG(c);
+        }
+
+        for (double i=10; i< 20; i++) {
+            double r = r1 +  (i/num)*w*(0.5-0.1);
+            String c = svgDrawer.addCircleD2(cx, cy, r, 359.9, 0);
+            svgDrawer.writeToSVG(c);
+        }
     }
 
     private void drawSpirograph() {
