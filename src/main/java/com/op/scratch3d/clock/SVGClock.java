@@ -14,30 +14,57 @@ public class SVGClock extends Base {
     String file = "clock";
     double mm2in = 25.4;
     int dpi = 50; //300
-    double totZIn = 1.5;
-    double spindleZIn = 0.65;
-    double baseZIn = totZIn - spindleZIn;
-    double win = 8;
-    double hin = win;
-    double w = win * dpi;
-    double h = hin * dpi;
+    double wIn = 11;
+    double hIn = wIn;
+    double w = wIn * dpi;
+    double h = hIn * dpi;
     double rad = w / 2;
     double cx = w / 2;
     double cy = h / 2;
-    double hoursOutRad = rad * 0.8;
-    double hoursInRad = rad * 0.7;
-    double hoursRad = rad * 0.075;
 
-    double clockWHin = 2.3;
+    double totZIn = 1.5;
+    double spindleZIn = 0.65;// should be less - 0.5?
+    double baseZIn = totZIn - spindleZIn;
+
+    double secRaIn = 4.6;
+    double minRadIn = 4.8;
+    double hourRadIn = 3.5;
+    double cardThIn = 0.04;//48 = 52mm, 1.083 = 0.036In
+
+    double clockWHin = 2.2;
     double clockCornerRin = 0.2;
-    double spindleRin = 0.2;
+    double spindleRin = 0.16;//0.2
+
+    double dowelRadIn = 0.65 / 2;
+    double dowelWHIn = clockWHin + dowelRadIn * 4;
+
+    double stripWIn = 0.8;
+    double stripHIn = 2.5;
+    double stripZIn = 0.2;
+    double stripXOffIn = dowelWHIn / 1.6;
+
+    double secRad = dpi * secRaIn;
+    double minRad = dpi * minRadIn;
+    double hourRad = dpi * hourRadIn;
+
+    double hoursRad = rad * 0.1; //0.075;
+    double hoursOutRad = minRad - hoursRad / 2; //rad * 0.8; //minRad;
+    double hoursInRad = hourRad + hoursRad / 2; //rad * 0.7;
+
 
     double clockWH = dpi * clockWHin;
     double clockCornerR = dpi * clockCornerRin;
     double spindleR = dpi * spindleRin;
+    double dowelR = dpi * dowelRadIn;
+    double dowelWH = dpi * dowelWHIn;
 
-    double cardThIn = 0.04;
+    double stripW = dpi * stripWIn;
+    double stripH = dpi * stripHIn;
+    double stripXOff = dpi * stripXOffIn;
+
     int totSheets = (int) (totZIn / cardThIn);
+
+    boolean drawHands = false;
 
     PrintWriter writer;
 
@@ -53,8 +80,8 @@ public class SVGClock extends Base {
             startPath(svgNum);
             double zIn = (double) ((svgNum + 1) * cardThIn);
             addOuter();
-            if (totSheets - svgNum <= 12) {
-                int firstCutHourNum = (totSheets - svgNum);
+            if (totSheets - svgNum <= 24) {
+                int firstCutHourNum = (totSheets - svgNum + 1) / 2;
                 for (double a = 360; a > 0; a = a - 30) {
                     int hourNum = (int) (a / 30);
                     if (hourNum >= firstCutHourNum) {
@@ -68,15 +95,83 @@ public class SVGClock extends Base {
             } else {
                 drawSpindle(svgNum);
             }
+
+            if (svgNum < totSheets - 1) {
+                drawDowels(svgNum);
+            }
+
+            if (zIn <= stripZIn) {
+                drawStrips(svgNum);
+            }
+
             endPath();
         }
+
+
+        if (drawHands) {
+            drawHands(totSheets);
+        }
         endSVG();
+    }
+
+    private void drawStrips(int svgNum) {
+        String b1 = "M" + formatD(cx - stripXOff - stripW / 2) + " " + formatD(cy - stripH / 2) + " " +
+                "L " + formatD(cx - stripXOff + stripW / 2) + " " + formatD(cy - stripH / 2) + " " +
+                "L " + formatD(cx - stripXOff + stripW / 2) + " " + formatD(cy + stripH / 2) + " " +
+                "L " + formatD(cx - stripXOff - stripW / 2) + " " + formatD(cy + stripH / 2) + " " +
+                "L " + formatD(cx - stripXOff - stripW / 2) + " " + formatD(cy - stripH / 2) + " ";
+
+        String b2 = "M" + formatD(cx + stripXOff - stripW / 2) + " " + formatD(cy - stripH / 2) + " " +
+                "L " + formatD(cx + stripXOff + stripW / 2) + " " + formatD(cy - stripH / 2) + " " +
+                "L " + formatD(cx + stripXOff + stripW / 2) + " " + formatD(cy + stripH / 2) + " " +
+                "L " + formatD(cx + stripXOff - stripW / 2) + " " + formatD(cy + stripH / 2) + " " +
+                "L " + formatD(cx + stripXOff - stripW / 2) + " " + formatD(cy - stripH / 2) + " ";
+
+        writer.println(b1);
+        writer.println(b2);
+    }
+
+    private void drawDowels(int svgNum) {
+        drawDowel(svgNum, cx - dowelWH / 2, cy + dowelWH / 2);
+        drawDowel(svgNum, cx + dowelWH / 2, cy + dowelWH / 2);
+        drawDowel(svgNum, cx - dowelWH / 2, cy - dowelWH / 2);
+        drawDowel(svgNum, cx + dowelWH / 2, cy - dowelWH / 2);
+
+    }
+
+    private void drawDowel(int svgNum, double cx1, double cy1) {
+        double[] start1 = polarToCartesian(cx1, cy1, dowelR, 0);
+        double[] end1 = polarToCartesian(cx1, cy1, dowelR, 180);
+        String c1 = "M" + formatD(start1[0]) + " " + formatD(start1[1]) + " A " + formatD(dowelR) + " " + formatD(dowelR)
+                + " 0 0 1 " + formatD(end1[0]) + " " + formatD(end1[1]);
+        String c2 = "A " + formatD(dowelR) + " " + formatD(dowelR)
+                + " 0 0 1 " + formatD(start1[0]) + " " + formatD(start1[1]);
+
+        writer.println(c1);
+        writer.println(c2);
+    }
+
+    private void drawHands(int svgNum) {
+        startPath(svgNum);
+        double[] sec = polarToCartesian(cx, cy, secRad, 180 - 90);
+        double[] min = polarToCartesian(cx, cy, minRad, 60 - 90);
+        double[] hour = polarToCartesian(cx, cy, hourRad, 300 - 90);
+
+        String s = "M" + formatD(cx) + " " + formatD(cy) + " L" + formatD(sec[0]) + " " + formatD(sec[1]);
+        String m = "M" + formatD(cx) + " " + formatD(cy) + " L" + formatD(min[0]) + " " + formatD(min[1]);
+        String hh = "M" + formatD(cx) + " " + formatD(cy) + " L" + formatD(hour[0]) + " " + formatD(hour[1]);
+
+        writer.println(s);
+        writer.println(m);
+        writer.println(hh);
+
+        endPath();
     }
 
     private void drawSpindle(int svgNum) {
         double[] start1 = polarToCartesian(cx, cy, spindleR, 0);
         double[] end1 = polarToCartesian(cx, cy, spindleR, 180);
-        String c1 = "M" + formatD(start1[0]) + " " + formatD(start1[1]) + " A " + formatD(clockCornerR) + " " + formatD(clockCornerR)
+        String c1 = "M" + formatD(start1[0]) + " " + formatD(start1[1]) + " A " + formatD(spindleR) + " " + formatD(spindleR)
                 + " 0 0 1 " + formatD(end1[0]) + " " + formatD(end1[1]);
         String c2 = "A " + formatD(spindleR) + " " + formatD(spindleR)
                 + " 0 0 1 " + formatD(start1[0]) + " " + formatD(start1[1]);
