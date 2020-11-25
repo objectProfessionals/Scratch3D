@@ -162,7 +162,7 @@ public class RotateScratch3D extends Base {
             }
 
             calcVertices(newFaces, orig2Rot, ang);
-            System.out.println("drawFromCircles finished ang="+ang);
+            System.out.println("drawFromCircles finished totalAngle="+ang);
         }
 
         int i=0;
@@ -181,7 +181,7 @@ public class RotateScratch3D extends Base {
 //                point = vertexTransformer.adjustPointForPerspective(point);
 //            }
             if (occlude) {
-                //VertexGeometric rotated = getRotatedVertex(point, ang);
+                //VertexGeometric rotated = getRotatedVertex(point, totalAngle);
                 VertexGeometric rotated = orig2Rot.get(point);
                 boolean visible = objLoader.isVertexVisible(newFaces, rotated);
                 point.defs.arcs.add(visible);

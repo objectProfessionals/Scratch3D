@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Scratch3D.iml" filepath="$PROJECT_DIR$/.idea/Scratch3D.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D_main.iml" group="Scratch3D" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D_test.iml" group="Scratch3D" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scratch3D.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Scratch3D.test.iml" />
     </modules>
   </component>
 </project>

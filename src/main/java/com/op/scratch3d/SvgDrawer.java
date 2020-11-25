@@ -71,8 +71,8 @@ public class SvgDrawer {
 
         StringBuffer sb = new StringBuffer();
         sb.append(addArc(xc, yc, rad, angSt, angEn));
-        // double ang = ((angSt + angEn) / 2) % 360;
-        // String col = ang >= 180 ? "red" : "blue";
+        // double totalAngle = ((angSt + angEn) / 2) % 360;
+        // String col = totalAngle >= 180 ? "red" : "blue";
         writeToSVG(sb);
         split();
         System.out.println("numSvgs = " + numSvgs);
@@ -147,14 +147,16 @@ public class SvgDrawer {
             e.printStackTrace();
         }
         writer.println("<svg width=\"" + ((int) w) + "\" height=\"" + ((int) (h))
-                + "\" xmlns=\"http://www.w3.org/2000/svg\">");
+                + "\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\">");
         writer.println("");
         int dd = (int) (w - sqOff);
         // writer.println("<rect x=\"" + rad + "\" y=\"" + rad + "\" width=\"" +
         // (w - rad * 2) + "\" height=\""
         // + (h - rad * 2) + "\" rx=\"" + rad + "\" ry=\"" + rad + "\"
         // stroke=\"blue\" fill=\"none\"/>");
-        writer.println("<path d=\"");
+        writer.println("<g style=\"display:inline\" inkscape:label=\"" + 0 + "\" id=\"" + 0 + "-layer\" "+
+                "inkscape:groupmode=\"layer\">");
+        writer.println("<path id=\"path0\" d=\"");
         if (square) {
 //            double sqOff2 = sqOff * 2;
 //            writer.println("M" + sqOff + " " + sqOff2 + " L" + sqOff + " " + sqOff + " L" + sqOff2 + " " + sqOff);
@@ -176,6 +178,7 @@ public class SvgDrawer {
                 writer.println(addCircleD2((int) (w / 2), (int) (h / 2), (int) (w * radFOut)));
             }
         }
+        endSVGPath("black");
 
     }
 
@@ -187,13 +190,24 @@ public class SvgDrawer {
         System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg numSvgs=" + numSvgs);
     }
 
-    public void endSVG() {
-        String col = "blue";
-        writer.println("\" stroke=\"" + col + "\" fill=\"none\" />");
-        // writer.println("<!-- radmm = " + scalemm + " -->");
-        // writer.println("<!-- adjustFr = " + perspectiveAdjustFr + " -->");
-        // writer.println("<!-- adjustBa = " + perspectiveAdjustBa + " -->");
+    public void startSVGPath(int svgNum) {
+        writer.println("<g style=\"display:inline\" inkscape:label=\"" + (svgNum+1) + "\" id=\"" + (svgNum+1) + "-layer\" "+
+                "inkscape:groupmode=\"layer\">");
+        writer.println("<path id=\"path"+(svgNum+1)+"\" d=\"");
 
+    }
+    public void endSVGPath() {
+        String col = "blue";
+        endSVGPath(col);
+
+    }
+    public void endSVGPath(String col) {
+        writer.println("\" stroke=\"" + col + "\" fill=\"none\" />");
+        writer.print("</g>");
+        writer.print("");
+    }
+
+    public void endSVG() {
         writer.println("</svg>");
         writer.close();
         System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg numSvgs=" + numSvgs);

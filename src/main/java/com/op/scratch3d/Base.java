@@ -1,11 +1,14 @@
 package com.op.scratch3d;
 
+import com.owens.oobjloader.builder.VertexGeometric;
+
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Base {

@@ -23,7 +23,7 @@ public class ArcScratch3D extends Base {
     //private String obj = "cubeLow";
     //private String obj = "cubeEdgeCut";
     //private String obj = "CubeCentered";
-    // private String obj = "cubeCuts";
+    //private String obj = "cubeCuts";
     //private String obj = "cubeHi";
     // private String obj = "spheres";
     // private String obj = "Falcon";
@@ -44,6 +44,8 @@ public class ArcScratch3D extends Base {
     // private String obj = "test-pyramidSq";
     //private String obj = "KD-TorusKnot1";
     //private String obj = "KD-TorusKnot3";
+    //private String obj = "KD-TorusKnotHi";
+    //private String obj = "TorusKnot3-256";
     //private String obj = "KD-Spikey";
     //private String obj = "SP-Tetrahedron";
     //private String obj = "SP-Cube";
@@ -60,16 +62,19 @@ public class ArcScratch3D extends Base {
     //private String obj = "MetaBall";
     //private String obj = "TEXT-ILU";
     //private String obj = "KD-TorusKnot";
-    private String obj = "SW-LowPolyTie3";
+    //private String obj = "SW-LowPolyTie3";
     //private String obj = "SW-Falcon6";
     //private String obj = "SW-Tie";
     //private String obj = "SW-TieLow";
     //private String obj = "SW-TrooperPlane";
     //private String obj = "Gear";
+    //private String obj = "pyramid";
+    //private String obj = "CubeT";
+    private String obj = "TieLPT";
 
-    double sqOffF = 0.02;
+    double sqOffF = 0.01;
     boolean doClipToSqOff = true;
-    boolean selectedOnly = true;
+    boolean selectedOnly = false;
     boolean adjustForPerspective = true;
     boolean occlude = true;
 
@@ -78,16 +83,17 @@ public class ArcScratch3D extends Base {
     double mm2in = 25.4;
     double scalemm = 100; //127;
     double scaleMain = dpi * (scalemm / mm2in);
-    double sf = 0.3;//1.1
+    double sf = 0.25;//1.1
 
     private double wmm = scalemm;
     private double hmm = scalemm;
     private double w = dpi * (wmm / mm2in);
     private double h = dpi * (hmm / mm2in);
 
-    double ang = 90;
-    double num = 80;//20
-    double angInc = ang / num;
+    double totalAngle = 60;
+    double num = 20;//20
+    double angInc = totalAngle / num;
+    int maxSVGsPerPath = 500;
 
     private int cx = (int) (w / 2.0);
     private int cy = (int) (h / 2.0);
@@ -99,7 +105,7 @@ public class ArcScratch3D extends Base {
 
     private static ArcScratch3D scratch3D = new ArcScratch3D();
 
-    double vanZ = 20;//10
+    double vanZ = 10;//10
     double minRadF = 0.05;
 
     ObjLoader objLoader = new ObjLoader();
@@ -168,7 +174,7 @@ public class ArcScratch3D extends Base {
             }
         }
 
-        for (double a = -ang / 2; a <= ang / 2; a = a + angInc) {
+        for (double a = -totalAngle / 2; a <= totalAngle / 2; a = a + angInc) {
             ArrayList<Face> rotatedFaces = new ArrayList<Face>();
             HashMap<VertexGeometric, VertexGeometric> orig2rot = new HashMap<VertexGeometric, VertexGeometric>();
             for (Face face : originalFaces) {
@@ -197,12 +203,12 @@ public class ArcScratch3D extends Base {
             for (VertexGeometric origvg : orig2rot.keySet()) {
                 VertexGeometric rotvg = orig2rot.get(origvg);
                 boolean clipped = isVertexClipped(rotvg, origvg.defs, a);
-                boolean visible = objLoader.isVertexVisible(rotatedFaces, rotvg);
-                if ((!occlude && (doClipToSqOff && !clipped))) {
+                boolean visible = doClipToSqOff && objLoader.isVertexVisible(rotatedFaces, rotvg);
+                if ((!occlude && (!clipped))) {
                     origvg.defs.arcs.add(true);
-                } else if ((!occlude && (doClipToSqOff && clipped))) {
+                } else if ((!occlude && (clipped))) {
                     origvg.defs.arcs.add(false);
-                } else if ((doClipToSqOff && clipped) || !visible) {
+                } else if ((clipped) || !visible) {
                     origvg.defs.arcs.add(false);
                 } else {
                     origvg.defs.arcs.add(true);
@@ -212,6 +218,8 @@ public class ArcScratch3D extends Base {
 
         int c = 0;
         ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
+        int arcCount = 0;
+        boolean ended = false;
         for (Face face : originalFaces) {
             for (FaceVertex fv : face.vertices) {
                 VertexGeometric vg = fv.v;
@@ -224,15 +232,29 @@ public class ArcScratch3D extends Base {
                 used.add(vg);
 
                 ArrayList<Boolean> arcs = vg.defs.arcs;
+
+                if (c % maxSVGsPerPath == 0) {
+                    svgDescriber.startSVGPath(arcCount);
+                    ended = false;
+                    arcCount++;
+                }
                 drawVisibleArcs(arcs, vg);
+                if (c % maxSVGsPerPath == maxSVGsPerPath - 1) {
+                    svgDescriber.endSVGPath();
+                    ended = true;
+                }
+
                 System.out.println("c=" + c);
                 c++;
             }
         }
+        if (!ended) {
+            svgDescriber.endSVGPath();
+        }
     }
 
-    private void drawVisibleArcs(ArrayList<Boolean> arcs, VertexGeometric vg) {
-        double st = -ang / 2;
+    private int drawVisibleArcs(ArrayList<Boolean> arcs, VertexGeometric vg) {
+        double st = -totalAngle / 2;
         double ss = scaleMain * sf;
         double r = vg.defs.r * ss;
         // r = 0.25 * ss + 0.75 * vg.defs.r * ss;
@@ -244,6 +266,8 @@ public class ArcScratch3D extends Base {
         double arcSt = st;
         double arcEn = st + angInc;
         boolean lastArcOn = false;
+
+        int arcCount = 0;
         for (int i = 0; i < arcs.size(); i++) {
             double arcSt2 = arcSt + angInc;
             double arcEn2 = arcEn - angInc;
@@ -251,12 +275,14 @@ public class ArcScratch3D extends Base {
             if (arcOn) {
                 if ((i == arcs.size() - 1)) {
                     drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+                    arcCount++;
                 }
                 lastArcOn = true;
                 arcEn = arcEn + angInc;
             } else {
                 if (lastArcOn) {
                     drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+                    arcCount++;
                     arcSt = arcEn;
                 }
                 lastArcOn = false;
@@ -264,6 +290,8 @@ public class ArcScratch3D extends Base {
                 arcSt = arcSt + angInc;
             }
         }
+
+        return arcCount;
     }
 
     private boolean isVertexClipped(VertexGeometric vg, ArcScratchDefs defs, double a) {
@@ -280,7 +308,7 @@ public class ArcScratch3D extends Base {
     }
 
     private void drawVisibleArcs1(ArrayList<Boolean> arcs, VertexGeometric vg) {
-        double st = -ang / 2;
+        double st = -totalAngle / 2;
         double ss = scaleMain * sf;
         double r = vg.defs.r * ss;
         // r = 0.25 * ss + 0.75 * vg.defs.r * ss;
@@ -350,8 +378,8 @@ public class ArcScratch3D extends Base {
         double yy = cy + y * scaleMain;
 
         double midA = p1.z <= 0 ? 270 : 90;
-        double angSt = midA - ang / 2;
-        double angEn = angSt + ang;
+        double angSt = midA - totalAngle / 2;
+        double angEn = angSt + totalAngle;
 
         double aa = angInc;
 
@@ -362,7 +390,7 @@ public class ArcScratch3D extends Base {
             p2.defs.r = rad;
         }
 
-        for (double a = angSt; a < angSt + ang; a = a + aa) {
+        for (double a = angSt; a < angSt + totalAngle; a = a + aa) {
             int xtl = (int) (xx - rad);
             int ytl = (int) (yy - rad);
             int r = (int) rad;

@@ -227,9 +227,9 @@ public class SVGClock extends Base {
     private void addOuter() {
         double[] startO = polarToCartesian(cx, cy, rad, 0);
         double[] endO = polarToCartesian(cx, cy, rad, 180);
-        String c1 = "M" + formatD(startO[0]) + " " + formatD(startO[1]) + " A " + formatD(hoursRad) + " " + formatD(hoursRad)
+        String c1 = "M" + formatD(startO[0]) + " " + formatD(startO[1]) + " A " + formatD(rad) + " " + formatD(rad)
                 + " 0 0 1 " + formatD(endO[0]) + " " + formatD(endO[1]);
-        String c2 = "A " + formatD(hoursRad) + " " + formatD(hoursRad)
+        String c2 = "A " + formatD(rad) + " " + formatD(rad)
                 + " 0 0 1 " + formatD(startO[0]) + " " + formatD(startO[1]);
 
         writer.println(c1);

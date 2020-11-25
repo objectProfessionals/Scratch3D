@@ -63,6 +63,11 @@ public class ObjLoader {
         return !anyFacesHavePointInside(allFiltered, p);
     }
 
+    boolean isTextureVertexVisible(ArrayList<Face> faces, VertexGeometric textVG) {
+        ArrayList<Face> allFiltered = getAllFacesWithLargerZ(faces, textVG);
+
+        return !anyFacesHavePointInside(allFiltered, textVG);
+    }
     private boolean anyFacesHavePointInside(ArrayList<Face> allFiltered, VertexGeometric p) {
         for (Face face : allFiltered) {
             if (isPointContained(face, p) && isPZBehind(face, p)) {
@@ -93,7 +98,7 @@ public class ObjLoader {
         }
         path.closePath();
 
-        double insideF = 0.999;
+        double insideF = 1;
         Point2D pp = new Point2D.Double(p.x * insideF, p.y * insideF);
         return path.contains(pp);
     }

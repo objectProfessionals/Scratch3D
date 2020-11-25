@@ -1,7 +1,6 @@
 package com.op.scratch3d.sounds;
 
 import com.op.scratch3d.Base;
-import com.owens.oobjloader.builder.VertexGeometric;
 import org.apache.batik.ext.awt.geom.PathLength;
 
 import java.awt.*;
@@ -24,9 +23,11 @@ public class PlotVolume extends Base {
     private static final String CIRCLE = "circle";
     private static final String LINEAR = "linear";
     private static final String LINEAR_SCORE = "score";
+    private static final String LINEAR_MULTI_SCORE = "mscore";
     private static final String LINEAR_CUTS = "cuts";
-    private static final String typeName = CIRCLE;
-    private static final String scName = "ILoveYouLow500Hz"; // "hello20";
+    private static final String typeName = LINEAR_MULTI_SCORE;
+    //private static final String scName = "ILoveYouLow500Hz"; // "hello20";
+    private static final String scName = "ILoveYouMax1"; // "hello20";
     //private static final String scName = "ILoveYou20"; // "hello20";
     //private static final String scName = "sine100-500-0.3s"; // "hello20";
     private static final String opFileName = typeName + scName; // "hello20";
@@ -37,13 +38,13 @@ public class PlotVolume extends Base {
     private double volAmp = 1;
     private static PlotVolume tester;
     private WaveFileReader reader;
-    private double dpi = 300;
-    // private double dpi = 75;
+    //private double dpi = 300;
+    private double dpi = 90;
     private double mm2in = 25.4;
-    private double wmm = 200;
-    private double hmm = 200;
-    //private double wmm = 100;//LINEAR
-    //private double hmm = 100;
+    //    private double wmm = 200;
+//    private double hmm = 200;
+    private double wmm = 10;//LINEAR
+    private double hmm = 300;
     private int w = (int) (dpi * (wmm / mm2in));
     private int h = (int) (dpi * (hmm / mm2in));
     private int cx = w / 2;
@@ -95,8 +96,9 @@ public class PlotVolume extends Base {
         System.out.println("Drawing " + scName + "...");
         int end = (int) (reader.getDataLen());
         ArrayList<Point2D> p = new ArrayList<Point2D>();
-        for (int i = 0; i < end - 1; i = i + 1) {
-            p.add(new Point2D.Double(i, getAverage(i)));
+        for (int i = 1; i < end - 1; i = i + 1) {
+            //p.add(new Point2D.Double(i, getAverage(i)));
+            p.add(new Point2D.Double(i, getPeaksVolume(i)));
         }
         if (typeName.equals(SPIRAL)) {
             drawAsSpiral(p);
@@ -113,6 +115,8 @@ public class PlotVolume extends Base {
             drawAsLineCutsSVG(p);
         } else if (typeName.equals(LINEAR_SCORE)) {
             drawAsLinearScore(p);
+        } else if (typeName.equals(LINEAR_MULTI_SCORE)) {
+            drawAsLinearMultiScore(p);
         }
     }
 
@@ -142,6 +146,48 @@ public class PlotVolume extends Base {
 
         System.out.println("count=" + count);
         writer.println("\" stroke=\"black\" fill=\"none\" />");
+    }
+
+    private void drawAsLinearMultiScore(ArrayList<Point2D> p) {
+        int bits = 8;
+        double inc = 2;
+        double hf = ((double) h) / ((double) (p.size()));
+        double strmm = 0.25;
+        double str = (dpi * (strmm / mm2in));
+        int allcount = 0;
+        for (int n = 1; n <= bits; n++) {
+            writer.println("<path id=\"path" + n + "\" d=\"");
+            drawLine(0, 0, w, 0);
+
+            int count = 0;
+            for (double i = 1; i < p.size(); i = i + inc) {
+                Point2D p1 = p.get((int) i);
+                double vol = p1.getY();
+                double volf = (-min + vol) / (max - min);
+                double ampl = Math.abs(volf - 0.5);
+                double y = i * hf;
+                double dd = 1 + bits * 2;
+
+                int num = (int) ((ampl) * dd);
+                //num = num > 0 ? num : 0;
+                if (num == n) {
+                    double l = (bits-n)*0.5;
+                    count = count + num;
+                    System.out.println("num=" + num + ", y=" + y);
+                    drawLine(l, y, w-(2*l), y);
+                } else {
+                    //System.out.println("****num=" + num);
+                }
+            }
+
+            drawLine(0, h, w, h);
+
+            double op = ((double) n) / ((double) bits);
+            System.out.println("count(" + n + ")=" + count);
+            writer.println("\" stroke=\"black\" stroke-width=\"" + str + "\" stroke-opacity=\"" + op + "\" fill=\"none\" />");
+            allcount = allcount + count;
+        }
+        System.out.println("allcount=" + allcount);
     }
 
     private void drawAsLineSVG(ArrayList<Point2D> p) {
@@ -687,12 +733,12 @@ public class PlotVolume extends Base {
         writer.println(addCircle(xc, yc, rs + outerOff));
         writer.println(addCircle(xc, yc, rs + outerOff));
 
-        double crRad = xc/10;
-        double pRad = xc/20;
+        double crRad = xc / 10;
+        double pRad = xc / 20;
         drawLine(xc, yc - crRad, xc, yc + crRad);
         drawLine(xc - crRad, yc, xc + crRad, yc);
-        drawLineTo(xc + crRad-pRad, yc+pRad);
-        drawLineTo(xc + crRad-pRad, yc-pRad);
+        drawLineTo(xc + crRad - pRad, yc + pRad);
+        drawLineTo(xc + crRad - pRad, yc - pRad);
         drawLineTo(xc + crRad, yc);
 
         writer.println("\" stroke=\"black\" fill=\"none\" />");
@@ -784,6 +830,18 @@ public class PlotVolume extends Base {
         Color colo = new Color(cc, cc, cc);
         System.out.println(x + ":" + cc);
         return colo;
+    }
+
+    private double getPeaksVolume(int i) {
+        double val0 = reader.getData()[0][i - 1];
+        double val = reader.getData()[0][i];
+        double val1 = reader.getData()[0][i + 1];
+        if ((val0 < val && val > val1) || (val0 > val && val < val1)) {
+            double value = getVolume(val);
+            return value;
+        }
+
+        return 0;
     }
 
     private double getAverage(int i) {

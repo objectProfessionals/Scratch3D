@@ -19,6 +19,7 @@ public class Face {
     public ArrayList<FaceVertex> vertices = new ArrayList<FaceVertex>();
     public Material material = null;
     public Material map = null;
+    public ArrayList<TexturePointArcDefs> texturePoints = new ArrayList<>();
 
     public Face() {
     }
@@ -64,4 +65,8 @@ public class Face {
         }
         return result;
     }
-}   
+
+    public void addTexturePoint(TexturePointArcDefs tpad) {
+        texturePoints.add(tpad);
+    }
+}
