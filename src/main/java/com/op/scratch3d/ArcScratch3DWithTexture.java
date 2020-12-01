@@ -13,100 +13,28 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 
-public class ArcScratch3DWithTexture extends Base {
+public class ArcScratch3DWithTexture extends ArcScratchBase {
 
-    private String opDir = hostDir + "output/";
-    private String objDir = hostDir + "objFiles/";
     private String texDir = hostDir + "textures/";
-    private String animDir = hostDir + "animate/";
-    private Graphics2D opG = null;
     private BufferedImage bi = null;
     private double ww = 0;
     private double hh = 0;
 
-    // private String obj = "earth";
-    // private String obj = "cubeLow";
-    // private String obj = "cubeEdgeCut";
-    // private String obj = "cubeCuts";
-    // private String obj = "cubeHi";
-    // private String obj = "spheres";
-    // private String obj = "Falcon";
-    // private String obj = "cubeLowWithEdges";
-    // private String obj = "cubeHiStraight";
-    // private String obj = "SW_DS";
-    // private String obj = "tieFull";
-    // private String obj = "spikey";
-    // private String obj = "KD-Hinge";
-    // private String obj = "KD-SphereHoles";
-    // private String obj = "KD-Torus-Limpet";
-    // private String obj = "KD-Shell";
-    // private String obj = "cubeSpheresB";
-    // private String obj = "coneHi";
-    // private String obj = "sphereMed";
-    // private String obj = "cubeHoleMax";
-    // private String obj = "hook";
-    // private String obj = "cubeHole2";
-    // private String obj = "test-planes";
-    // private String obj = "test-z";
-    // private String obj = "test-pyramidSq";
-    //private String obj = "pyramid";
-    //private String obj = "CubeT";
-    //private String obj = "TieLPT";
-    //private String obj = "CubeWaves";
-    //private String obj = "TorusWaves";
     private String obj = "CubeHoles";
-    private String textFileSuffix = "";
-
-    double sqOffF = 0.01;
-    boolean doClipToSqOff = true;
-    boolean selectedOnly = false;
-    boolean adjustForPerspective = true;
-    boolean occlude = true;
+    //private String obj = "Cube";
+    private String textFileSuffix = "Texture";
 
     private String src = "ARCscratch3DText-" + obj;
-    double dpi = 200;
-    double mm2in = 25.4;
-    double scalemm = 100;
-    double scaleMain = dpi * (scalemm / mm2in);
-
-    private double wmm = scalemm;
-    private double hmm = scalemm;
-    private double w = dpi * (wmm / mm2in);
-    private double h = dpi * (hmm / mm2in);
-
-    double sweepAng = 45;
-    double totalAngle = sweepAng * 2;
-    double num = 20;
-    double angInc = totalAngle / (num);
-    //double sf = 0.65; //0.5 side cube, sweepAng=15
-    double sf = 0.35; //1 side cube
-    double greyLevel = 50;
     private int imageScanDelta = 10;
-    boolean includeVerts = false;
 
-    private int cx = (int) (w / 2.0);
-    private int cy = (int) (h / 2.0);
-    int totFaceUVs =0;
-
-    ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();
-    ArrayList<Face> originalFaces = new ArrayList<Face>();
-    ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
-    public HashMap<String, ArrayList<Face>> groups;
+    private int totFaceUVs = 0;
+    private double gLevel = 0.5;
 
     private static ArcScratch3DWithTexture scratch3D = new ArcScratch3DWithTexture();
 
-    double vanZ = 10;
-    double minRadF = 0.05;
-
-    ObjLoader objLoader = new ObjLoader();
-    SvgDrawer svgDrawer = new SvgDrawer(opDir, src, w, h, w * sqOffF);
-    boolean savePNG = false;
-    private VertexTransformer vertexTransformer;
+    private Random random = new Random(0);
 
     /**
      * @param args
@@ -117,29 +45,28 @@ public class ArcScratch3DWithTexture extends Base {
      */
     public static void main(String[] args) throws Exception {
         // scratch3D.paint();
-        scratch3D.loadOBJ();
+        scratch3D.drawAll();
 
     }
 
-    private void loadOBJ() throws Exception {
-        init();
-        // allPoints = adjustPoints(allPoints);
-        originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
-        vertexTransformer = new VertexTransformer(originalFaces, vanZ);
+    protected void drawAll() throws Exception {
+        initBI();
+        initAll(obj, src, textFileSuffix);
         getUVPoints(originalFaces);
-
-        if (selectedOnly) {
-            selectedVerts = objLoader.loadOBJSelectedVerts(objDir + obj + "_sel");
-        }
-
-        groups = objLoader.groups;
-        drawAllPoints();
+        drawTransformedFacesForArc();
         save();
-
     }
+
+    private void initBI() throws IOException {
+        bi = ImageIO.read(new File(texDir + obj + textFileSuffix + ".png"));
+        ww = bi.getWidth();
+        hh = bi.getHeight();
+    }
+
 
     private void getUVPoints(ArrayList<Face> faces) {
         for (Face face : faces) {
+            face.texturePoints.clear();
             double uv[][] = {{0, 0}, {0, 0}, {0, 0}};
             double xyz[][] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
             uv[0][0] = face.vertices.get(0).t.u;
@@ -169,7 +96,7 @@ public class ArcScratch3DWithTexture extends Base {
             scanAllDots(face, uvA, uvB, uvC, p3dA, p3dB, p3dC);
             totFaceUVs = totFaceUVs + face.texturePoints.size();
         }
-        System.out.println("tto scanned="+totFaceUVs);
+        System.out.println("tto scanned=" + totFaceUVs);
 
     }
 
@@ -182,8 +109,6 @@ public class ArcScratch3DWithTexture extends Base {
         path.lineTo(uvB.x, uvB.y);
         path.lineTo(uvC.x, uvC.y);
         path.closePath();
-        double www = path.getBounds2D().getWidth();
-        double hhh = path.getBounds2D().getHeight();
         double imageWidthHeight = (double) ww;
         tri.reset();
         tri.addPoint((int) (uvA.x * imageWidthHeight), (int) (hh - uvA.y * imageWidthHeight));
@@ -197,15 +122,12 @@ public class ArcScratch3DWithTexture extends Base {
                 if (tri.contains(p1)) {
                     int rgb = bi.getRGB(x, y);
                     Color col = new Color(rgb);
-                    if (col.getRed() < greyLevel) {
-//                        double xx = ((double) x - (double) (rect.x)) / rect.width;
-//                        double yy = ((double) y - (double) (rect.y)) / rect.height;
-//                        Point2D.Double p2 = new Point2D.Double(www * xx, hhh * yy);
-
-                        //Point2D.Double p2 = new Point2D.Double(xx, yy);
-
-                        double xx = ((double) x)/imageWidthHeight;
-                        double yy = (imageWidthHeight - (double) y)/imageWidthHeight;
+                    double g = ((double) (col.getRed() + col.getBlue() + col.getGreen())) / (255.0 * 3.0);
+                    double rnd = random.nextDouble();
+                    boolean paint = (g < gLevel || g < rnd);
+                    if (paint) {
+                        double xx = ((double) x) / imageWidthHeight;
+                        double yy = (imageWidthHeight - (double) y) / imageWidthHeight;
                         Point2D.Double p2 = new Point2D.Double(xx, yy);
 
                         Point3D p3d = tt.get3DPoint(uvA, uvB, uvC, p2, p3dA, p3dB, p3dC);
@@ -221,9 +143,6 @@ public class ArcScratch3DWithTexture extends Base {
                         }
                         double xxx = vg.x * sc;
                         double yyy = vg.y * sc;
-
-                        // double x = vg.x;
-                        // double y = vg.y;
                         double zzz = vg.z;
                         double rad = (minRadF) + (1 - minRadF) * (Math.abs(zzz));
 
@@ -237,7 +156,7 @@ public class ArcScratch3DWithTexture extends Base {
                         }
 
                         tpad.vg = vg;
-                        System.out.println("x,y"+x+","+y+" "+vg.toString());
+                        System.out.println("x,y" + x + "," + y + " " + vg.toString());
                         face.addTexturePoint(tpad);
                     }
                 }
@@ -246,7 +165,7 @@ public class ArcScratch3DWithTexture extends Base {
         }
     }
 
-    private void drawAllPoints() {
+    public void drawTransformedFacesForArc() {
         for (Face face : originalFaces) {
             for (FaceVertex fv : face.vertices) {
                 VertexGeometric vg = fv.v;
@@ -282,8 +201,6 @@ public class ArcScratch3DWithTexture extends Base {
                 double x = vg.x * sc;
                 double y = vg.y * sc;
 
-                // double x = vg.x;
-                // double y = vg.y;
                 double z = vg.z;
                 double rad = (minRadF) + (1 - minRadF) * (Math.abs(z));
 
@@ -298,11 +215,11 @@ public class ArcScratch3DWithTexture extends Base {
             }
         }
 
-        ArrayList<VertexGeometric> orig = new ArrayList<VertexGeometric>();
-        for (double a = -totalAngle / 2; a <= totalAngle / 2; a = a + angInc) {
+        for (double a = -sweepAng; a <= sweepAng; a = a + angInc) {
             ArrayList<Face> rotatedFaces = new ArrayList<Face>();
             HashMap<VertexGeometric, VertexGeometric> orig2rot = new HashMap<VertexGeometric, VertexGeometric>();
-            HashMap<VertexGeometric, VertexGeometric> textOrig2rot = new HashMap<VertexGeometric, VertexGeometric>();
+            HashMap<VertexGeometric, VertexGeometric> textOrig2rot = new HashMap<>();
+            HashMap<VertexGeometric, Face> textV2rotFace = new HashMap<>();
             for (Face face : originalFaces) {
                 Face rotatedFace = new Face();
                 for (FaceVertex fv : face.vertices) {
@@ -322,7 +239,6 @@ public class ArcScratch3DWithTexture extends Base {
                     rotatedfv.v = rotatedvg;
                     rotatedFace.vertices.add(rotatedfv);
                     orig2rot.put(origv, rotatedvg);
-                    orig.add(origv);
                 }
                 rotatedFaces.add(rotatedFace);
 
@@ -341,15 +257,14 @@ public class ArcScratch3DWithTexture extends Base {
                     VertexGeometric rotatedvg = new VertexGeometric((float) (resx), (float) (resy), origv.z);
                     tpad.rotatedvg = rotatedvg;
                     textOrig2rot.put(origv, rotatedvg);
-                    orig.add(origv);
-
+                    textV2rotFace.put(rotatedvg, rotatedFace);
                 }
             }
 
             for (VertexGeometric origvg : textOrig2rot.keySet()) {
                 VertexGeometric rotvg = textOrig2rot.get(origvg);
-                boolean clipped = isVertexClipped(origvg.defs, a);
-                boolean visible = objLoader.isTextureVertexVisible(rotatedFaces, rotvg);
+                boolean clipped = isVertexClipped(rotvg, origvg.defs, a);
+                boolean visible = objLoader.isVertexVisibleForVertex(rotatedFaces, textV2rotFace.get(rotvg), rotvg);
                 if ((!occlude && (doClipToSqOff && !clipped))) {
                     origvg.defs.arcs.add(true);
                 } else if ((!occlude && (doClipToSqOff && clipped))) {
@@ -358,23 +273,6 @@ public class ArcScratch3DWithTexture extends Base {
                     origvg.defs.arcs.add(false);
                 } else {
                     origvg.defs.arcs.add(true);
-                }
-            }
-
-            if(includeVerts) {
-                for (VertexGeometric origvg : orig2rot.keySet()) {
-                    VertexGeometric rotvg = orig2rot.get(origvg);
-                    boolean clipped = isVertexClipped(origvg.defs, a);
-                    boolean visible = objLoader.isVertexVisible(rotatedFaces, rotvg);
-                    if ((!occlude && (doClipToSqOff && !clipped))) {
-                        origvg.defs.arcs.add(true);
-                    } else if ((!occlude && (doClipToSqOff && clipped))) {
-                        origvg.defs.arcs.add(false);
-                    } else if ((doClipToSqOff && clipped) || !visible) {
-                        origvg.defs.arcs.add(false);
-                    } else {
-                        origvg.defs.arcs.add(true);
-                    }
                 }
             }
 
@@ -395,7 +293,7 @@ public class ArcScratch3DWithTexture extends Base {
                 }
                 used.add(vg);
 
-                System.out.println("c=" + c +"/"+totFaceUVs);
+                System.out.println("c=" + c + "/" + totFaceUVs);
                 c++;
             }
         }
@@ -404,22 +302,24 @@ public class ArcScratch3DWithTexture extends Base {
 
         drawAllUsed(0, "red", used, true);
         drawAllUsed(1, "blue", used, false);
+
+        svgAnimator.save();
     }
 
     private void sortUsed(ArrayList<VertexGeometric> used) {
         int magz = 1000000;
         int magr = 1000;
         Collections.sort(used,
-                new Comparator<VertexGeometric>(){
+                new Comparator<VertexGeometric>() {
                     @Override
                     public int compare(VertexGeometric o1, VertexGeometric o2) {
-                        int zSplit = (int)(o1.z - o2.z);
-                        double r1 = Math.sqrt((o1.defs.cx * o1.defs.cx) +(o1.defs.cy * o1.defs.cy));
-                        double r2 = Math.sqrt((o2.defs.cx * o2.defs.cx) +(o2.defs.cy * o2.defs.cy));
+                        int zSplit = (int) (o1.z - o2.z);
+                        double r1 = Math.sqrt((o1.defs.cx * o1.defs.cx) + (o1.defs.cy * o1.defs.cy));
+                        double r2 = Math.sqrt((o2.defs.cx * o2.defs.cx) + (o2.defs.cy * o2.defs.cy));
                         if (zSplit > 0) {
-                            return magz + (int)(r1*magr-r2*magr);
+                            return magz + (int) (r1 * magr - r2 * magr);
                         } else {
-                            return -magz -(int)(r1*magr-r2*magr);
+                            return -magz - (int) (r1 * magr - r2 * magr);
                         }
                     }
                 });
@@ -428,7 +328,7 @@ public class ArcScratch3DWithTexture extends Base {
     private void drawAllUsed(int arcCount, String col, ArrayList<VertexGeometric> used, boolean closer) {
         svgDrawer.startSVGPath(arcCount);
         for (VertexGeometric vg : used) {
-            if ((closer && vg.z >= 0) || (!closer && vg.z <0)) {
+            if ((closer && vg.z >= 0) || (!closer && vg.z < 0)) {
                 ArrayList<Boolean> arcs = vg.defs.arcs;
                 drawVisibleArcs(arcs, vg);
             }
@@ -437,7 +337,7 @@ public class ArcScratch3DWithTexture extends Base {
     }
 
     private int drawVisibleArcs(ArrayList<Boolean> arcs, VertexGeometric vg) {
-        double st = -totalAngle / 2;
+        double st = -sweepAng;
         double ss = scaleMain * sf;
         double r = vg.defs.r * ss;
         // r = 0.25 * ss + 0.75 * vg.defs.r * ss;
@@ -452,19 +352,19 @@ public class ArcScratch3DWithTexture extends Base {
 
         int arcCount = 0;
         for (int i = 0; i < arcs.size(); i++) {
-            double arcSt2 = arcSt + angInc;
-            double arcEn2 = arcEn - angInc;
+            double arcSt2 = arcSt;
+            double arcEn2 = arcEn;
             boolean arcOn = arcs.get(i);
             if (arcOn) {
                 if ((i == arcs.size() - 1)) {
-                    drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+                    drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2 - angInc);
                     arcCount++;
                 }
                 lastArcOn = true;
                 arcEn = arcEn + angInc;
             } else {
                 if (lastArcOn) {
-                    drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2);
+                    drawSVGSrc(vg, r, xc, yc, z, startPosAng, arcSt2, arcEn2 - angInc);
                     arcCount++;
                     arcSt = arcEn;
                 }
@@ -475,139 +375,5 @@ public class ArcScratch3DWithTexture extends Base {
         }
 
         return arcCount;
-    }
-
-    private boolean isVertexClipped(ArcScratchDefs defs, double a) {
-        double ss = scaleMain * sf;
-        double r = defs.r * ss;
-        double xc = defs.cx * ss;
-        double yc = defs.cy * ss;
-        double st = defs.startPosAng;
-
-        double g = 180;
-        double y = -yc;
-        double s = (st - a) + g;
-        return svgDrawer.isClipped(cx + xc, cy + y, r, s - angInc);
-    }
-
-    private void drawVisibleArcs1(ArrayList<Boolean> arcs, VertexGeometric vg) {
-        double st = -totalAngle / 2;
-        double ss = scaleMain * sf;
-        double r = vg.defs.r * ss;
-        // r = 0.25 * ss + 0.75 * vg.defs.r * ss;
-        double xc = vg.defs.cx * ss;
-        double yc = vg.defs.cy * ss;
-        double z = vg.z;
-        double startPosAng = vg.defs.startPosAng;
-
-        boolean started = true;
-        boolean startedArc = true;
-        double stAng = st;
-        double enAng = st;
-        for (int i = 0; i < arcs.size(); i++) {
-            boolean arcOnOff = arcs.get(i);
-            if (i == arcs.size() - 1 && startedArc) {
-                drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
-            }
-
-            if (!started) {
-                if (!arcOnOff) {
-                    if (startedArc) {
-                        drawSVGSrc(vg, r, xc, yc, z, startPosAng, stAng, enAng);
-                        stAng = enAng + angInc;
-                        enAng = enAng + angInc;
-                        startedArc = false;
-                    } else {
-                        stAng = enAng;
-                        enAng = enAng + angInc;
-                    }
-                } else {
-                    startedArc = true;
-                    enAng = enAng + angInc;
-                }
-            } else {
-                started = false;
-                startedArc = false;
-            }
-        }
-    }
-
-    private boolean selectedVertsContains(VertexGeometric vg) {
-        for (VertexGeometric v : selectedVerts) {
-            if (objLoader.equals(vg, v)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void drawSVGSrc(VertexGeometric vg, double r, double xc, double yc, double z, double startPosAng,
-                            double stAng, double enAng) {
-        double g = 180;
-        double y = -yc;
-        double s = (startPosAng - stAng) + g;
-        double e = (startPosAng - enAng) + g;
-        int zz = ((int) (2 * z)) + 2;
-        svgDrawer.drawAndAddArc(cx + xc, cy + y, r, s, e);
-        // for (int i = 0; i < zz; i++) {
-        // svgDescriber.drawAndAddArc(cx + xc, cy + y, r, s, e);
-        // System.out.println("z=" + z + " zz=" + zz);
-        // }
-    }
-
-    private void drawArc(VertexGeometric p1, int c) {
-        VertexGeometric p2 = p1;
-
-        double x = p2.x;
-        double y = p2.y;
-        double z = p2.z * 0.5;
-        double rad = scaleMain * 0.25 * (Math.abs(z));
-        double xx = cx + x * scaleMain;
-        double yy = cy + y * scaleMain;
-
-        double midA = p1.z <= 0 ? 270 : 90;
-        double angSt = midA - totalAngle / 2;
-        double angEn = angSt + totalAngle;
-
-        double aa = angInc;
-
-        if (p2.defs == null) {
-            p2.defs = new ArcScratchDefs();
-            p2.defs.cx = xx - rad;
-            p2.defs.cy = yy - rad;
-            p2.defs.r = rad;
-        }
-
-        for (double a = angSt; a < angSt + totalAngle; a = a + aa) {
-            int xtl = (int) (xx - rad);
-            int ytl = (int) (yy - rad);
-            int r = (int) rad;
-            int d = (int) rad * 2;
-            int aStart = (int) (a);
-            int aEn = (int) (aa);
-            svgDrawer.saveArc(xtl, ytl, xtl + r, ytl + r, r, d, aStart, aEn);
-        }
-
-        boolean svg = true;
-        if (svg) {
-            svgDrawer.drawAndAddArc(xx, h - yy, rad, angSt, angEn);
-        }
-    }
-
-    private void init() throws IOException {
-        System.out.println("initialising...");
-
-        bi = ImageIO.read(new File(texDir + obj + textFileSuffix+".png"));
-        opG = (Graphics2D) bi.getGraphics();
-        ww = bi.getWidth();
-        hh = bi.getHeight();
-
-        svgDrawer.startSVG(true, false);
-
-        System.out.println("...finished initialising");
-    }
-
-    private void save() throws Exception {
-        svgDrawer.endSVG();
     }
 }

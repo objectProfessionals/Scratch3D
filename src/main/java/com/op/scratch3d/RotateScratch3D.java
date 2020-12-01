@@ -183,7 +183,7 @@ public class RotateScratch3D extends Base {
             if (occlude) {
                 //VertexGeometric rotated = getRotatedVertex(point, totalAngle);
                 VertexGeometric rotated = orig2Rot.get(point);
-                boolean visible = objLoader.isVertexVisible(newFaces, rotated);
+                boolean visible = objLoader.isVertexVisibleForVertex(newFaces, rotated);
                 point.defs.arcs.add(visible);
             } else {
                 point.defs.arcs.add(true);

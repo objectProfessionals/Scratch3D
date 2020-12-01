@@ -104,7 +104,7 @@ public class LineScratch3D extends Base {
         p2 = vertexTransformer.rotateVertexY(p1, aDegs, adjustForPerspective);
         if (occlude) {
             ArrayList<Face> faces = vertexTransformer.getTransformedFacesRotateY(aDegs, adjustForPerspective);
-            if (!objLoader.isVertexVisible(faces, p2)) {
+            if (!objLoader.isVertexVisibleForVertex(faces, p2)) {
                 return;
             }
         }

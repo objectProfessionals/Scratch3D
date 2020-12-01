@@ -5,6 +5,8 @@ import com.owens.oobjloader.builder.Face;
 import com.owens.oobjloader.builder.FaceVertex;
 import com.owens.oobjloader.builder.VertexGeometric;
 
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
@@ -56,11 +58,29 @@ public class ObjLoader {
         return allPoints;
     }
 
-    boolean isVertexVisible(ArrayList<Face> faces, VertexGeometric p) {
+    boolean isVertexVisibleForVertex(ArrayList<Face> faces, VertexGeometric p) {
         ArrayList<Face> all = getAllNonJoiningFaces(faces, p);
         ArrayList<Face> allFiltered = getAllFacesWithLargerZ(all, p);
 
         return !anyFacesHavePointInside(allFiltered, p);
+    }
+
+    boolean isVertexVisibleForVertex(ArrayList<Face> faces, Face currentFace, VertexGeometric p) {
+        ArrayList<Face> all = getAllNonJoiningFaces(faces, currentFace);
+        ArrayList<Face> allFiltered = getAllFacesWithLargerZ(all, p);
+
+        return !anyFacesHavePointInside(allFiltered, p);
+    }
+
+    ArrayList<Face> getAllNonJoiningFaces(ArrayList<Face> all, Face current) {
+        ArrayList<Face> remaining = new ArrayList<>();
+        for (Face a : all) {
+            if (!a.equals(current)) {
+                remaining.add(a);
+            }
+        }
+
+        return remaining;
     }
 
     boolean isTextureVertexVisible(ArrayList<Face> faces, VertexGeometric textVG) {
@@ -103,6 +123,7 @@ public class ObjLoader {
         return path.contains(pp);
     }
 
+    //https://stackoverflow.com/questions/5507762/how-to-find-z-by-arbitrary-x-y-coordinates-within-triangle-if-you-have-triangle
     double getZOnTriangle(VertexGeometric p1, VertexGeometric p2, VertexGeometric p3, double x, double y) {
         double det = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
 

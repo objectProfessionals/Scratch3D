@@ -51,7 +51,8 @@ public class TrianglesTest {
         double b = distance(A, C);
         double c = distance(A, B);
         double p = 0.5 * (a + b + c);
-        double area = Math.sqrt(p * (p - a) * (p - b) * (p - c));
+        double area = Math.sqrt(p * Math.abs(p - a) * Math.abs(p - b) * Math.abs(p - c));
+        //System.out.println(a+":"+b+":"+c+":"+area);
         return area;
     }
 

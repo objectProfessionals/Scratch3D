@@ -79,7 +79,7 @@ public class Base {
                     writeParam.setCompressionQuality(0.05f);
                 }
                 ImageTypeSpecifier typeSpecifier = ImageTypeSpecifier
-                        .createFromBufferedImageType(BufferedImage.TYPE_INT_ARGB);
+                        .createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
                 metadata = writer.getDefaultImageMetadata(typeSpecifier, writeParam);
                 if (metadata.isReadOnly() || !metadata.isStandardMetadataFormatSupported()) {
                     // continue;

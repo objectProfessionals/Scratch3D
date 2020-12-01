@@ -82,7 +82,7 @@ public class SweepScratch3D extends Base {
         VertexGeometric p3 = vertexTransformer.rotateVertexX(p2, 45, adjustForPerspective);
         if (occlude) {
             ArrayList<Face> faces = vertexTransformer.getTransformedFacesRotateZ(aDegs, adjustForPerspective);
-            if (!objLoader.isVertexVisible(faces, p3)) {
+            if (!objLoader.isVertexVisibleForVertex(faces, p3)) {
                 return;
             }
         }

@@ -109,7 +109,7 @@ public class AngRotateScratch3D extends Base {
 		p2 = vertexTransformer.rotateVertexY(p1, aDegs, adjustForPerspective);
 
 		if (occlude) {
-			if (!objLoader.isVertexVisible(faces, p2)) {
+			if (!objLoader.isVertexVisibleForVertex(faces, p2)) {
 				return;
 			}
 		}
