@@ -6,7 +6,9 @@ import com.owens.oobjloader.builder.VertexGeometric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+/*
+5000 svg paths = 90 mins to scratch = about 1 scratch per second
+ */
 public abstract class ArcScratchBase extends Base {
     String opDir = hostDir + "output/";
     String objDir = hostDir + "objFiles/";
@@ -22,18 +24,18 @@ public abstract class ArcScratchBase extends Base {
     double h = dpi * (hmm / mm2in);
     int cx = (int) (w / 2.0);
     int cy = (int) (h / 2.0);
-    int maxSVGsPerPath = 500;
-    double vanZ = 5;//10
-    double minRadF = 0.05;
+    int maxSVGsPerPath = 500000;
+    double vanZ = 10;//10
+    double minRadF = 0.02;
     boolean doClipToSqOff = true;
     boolean selectedOnly = false;
-    boolean adjustForPerspective = false;
+    boolean adjustForPerspective = true;
     boolean occlude = true;
 
-    double sf = 0.45;//1.1
-    double sweepAng = 30;
+    double sf = 0.55;//1.1
+    double sweepAng = 15;
     double totalAngle = sweepAng * 2;
-    double num = 20;//20
+    double num = 15;//20
     double angInc = totalAngle / num;
 
     ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();

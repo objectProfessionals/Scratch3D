@@ -22,15 +22,18 @@ public class ArcScratch3DWithTexture extends ArcScratchBase {
     private double ww = 0;
     private double hh = 0;
 
-    private String obj = "CubeHoles";
+    //private String obj = "CubeHoles";
     //private String obj = "Cube";
-    private String textFileSuffix = "Texture";
+    //private String obj = "Virga";
+    private String obj = "TorusKnot";
+    private String textFileSuffix = "TextureVoronoi2";
 
-    private String src = "ARCscratch3DText-" + obj;
-    private int imageScanDelta = 10;
+    private String src = "ARCscratch3DText-" + obj+textFileSuffix;
+    private int imageScanDelta = 5;
 
     private int totFaceUVs = 0;
-    private double gLevel = 0.5;
+    private double gLevel = 0.3;
+    private double rndLevel = 0.5;
 
     private static ArcScratch3DWithTexture scratch3D = new ArcScratch3DWithTexture();
 
@@ -96,7 +99,7 @@ public class ArcScratch3DWithTexture extends ArcScratchBase {
             scanAllDots(face, uvA, uvB, uvC, p3dA, p3dB, p3dC);
             totFaceUVs = totFaceUVs + face.texturePoints.size();
         }
-        System.out.println("tto scanned=" + totFaceUVs);
+        System.out.println("total faces.uv's scanned=" + totFaceUVs);
 
     }
 
@@ -123,7 +126,7 @@ public class ArcScratch3DWithTexture extends ArcScratchBase {
                     int rgb = bi.getRGB(x, y);
                     Color col = new Color(rgb);
                     double g = ((double) (col.getRed() + col.getBlue() + col.getGreen())) / (255.0 * 3.0);
-                    double rnd = random.nextDouble();
+                    double rnd = random.nextDouble()*rndLevel;
                     boolean paint = (g < gLevel || g < rnd);
                     if (paint) {
                         double xx = ((double) x) / imageWidthHeight;
@@ -278,7 +281,7 @@ public class ArcScratch3DWithTexture extends ArcScratchBase {
 
         } // all angs
 
-        int c = 0;
+        int c = 1;
         ArrayList<VertexGeometric> used = new ArrayList<VertexGeometric>();
         int arcCount = 0;
         boolean ended = false;
@@ -307,8 +310,8 @@ public class ArcScratch3DWithTexture extends ArcScratchBase {
     }
 
     private void sortUsed(ArrayList<VertexGeometric> used) {
-        int magz = 1000000;
-        int magr = 1000;
+        int magz = 10000;
+        int magr = 100;
         Collections.sort(used,
                 new Comparator<VertexGeometric>() {
                     @Override

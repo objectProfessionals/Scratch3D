@@ -17,6 +17,7 @@ import java.util.HashMap;
 public class ObjLoader {
 
     public HashMap<String, ArrayList<Face>> groups;
+    public double equalsTol = 0.001;
 
     public ObjLoader() {
     }
@@ -174,7 +175,7 @@ public class ObjLoader {
     }
 
     private boolean equals(float x, float x2) {
-        return Math.abs(x - x2) < 0.001; //0.001;
+        return Math.abs(x - x2) < equalsTol; //0.001;
     }
 
 }

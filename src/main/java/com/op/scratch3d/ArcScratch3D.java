@@ -65,7 +65,9 @@ public class ArcScratch3D extends ArcScratchBase {
     //private String obj = "Gear";
     //private String obj = "pyramid";
     //private String obj = "CubeT";
-    private String obj = "Cube";
+    //private String obj = "Cube";
+    private String obj = "CubeHoles";
+
 
     private String src = "ARCscratch3D-" + obj;
 

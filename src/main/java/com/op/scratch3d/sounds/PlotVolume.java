@@ -25,9 +25,9 @@ public class PlotVolume extends Base {
     private static final String LINEAR_SCORE = "score";
     private static final String LINEAR_MULTI_SCORE = "mscore";
     private static final String LINEAR_CUTS = "cuts";
-    private static final String typeName = LINEAR_MULTI_SCORE;
-    //private static final String scName = "ILoveYouLow500Hz"; // "hello20";
-    private static final String scName = "ILoveYouMax1"; // "hello20";
+    private static final String typeName = LINEAR;
+    private static final String scName = "ILoveYouVirga500"; // "hello20";
+    //private static final String scName = "ILoveYouMax1"; // "hello20";
     //private static final String scName = "ILoveYou20"; // "hello20";
     //private static final String scName = "sine100-500-0.3s"; // "hello20";
     private static final String opFileName = typeName + scName; // "hello20";
@@ -39,17 +39,18 @@ public class PlotVolume extends Base {
     private static PlotVolume tester;
     private WaveFileReader reader;
     //private double dpi = 300;
-    private double dpi = 90;
+    private double dpi = 96;
     private double mm2in = 25.4;
     //    private double wmm = 200;
 //    private double hmm = 200;
-    private double wmm = 10;//LINEAR
-    private double hmm = 300;
+    private double wmm = 10.0;//LINEAR
+    private double hmm = 584.2;//w = 9.79
     private int w = (int) (dpi * (wmm / mm2in));
     private int h = (int) (dpi * (hmm / mm2in));
     private int cx = w / 2;
     private int cy = h / 2;
     private boolean addBorder = true;
+    private boolean outline = true;
     private double bordermm = 20;
     private double border = (dpi * (bordermm / mm2in));
     private double max = -1;
@@ -57,6 +58,7 @@ public class PlotVolume extends Base {
     private PrintWriter writer;
     private String cut = "";
     private String cutO = "";
+    double LINEAR_amplTotmm = 0.5; //25;
 
     public static void main(String[] args) throws Exception, FontFormatException {
         tester = new PlotVolume();
@@ -97,8 +99,8 @@ public class PlotVolume extends Base {
         int end = (int) (reader.getDataLen());
         ArrayList<Point2D> p = new ArrayList<Point2D>();
         for (int i = 1; i < end - 1; i = i + 1) {
-            //p.add(new Point2D.Double(i, getAverage(i)));
-            p.add(new Point2D.Double(i, getPeaksVolume(i)));
+            p.add(new Point2D.Double(i, getAverage(i)));
+            //p.add(new Point2D.Double(i, getPeaksVolume(i)));
         }
         if (typeName.equals(SPIRAL)) {
             drawAsSpiral(p);
@@ -192,30 +194,38 @@ public class PlotVolume extends Base {
 
     private void drawAsLineSVG(ArrayList<Point2D> p) {
         writer.println("<path d=\"");
-        double amplHeightmm = 0.5; //25;
-        double amplHeight = (dpi * (amplHeightmm / mm2in));
+        if (outline) {
+            int time = 2;
+            for (int i = 0; i< time; i++) {
+                drawLine(1, 1, w, 1);
+                drawLineTo(w-1, h-1);
+                drawLineTo(1, h-1);
+                drawLineTo(1, 1);
+            }
+        }
 
-        double widthmm = (wmm - amplHeightmm * 2) * 0.9;
-        double width = (dpi * (widthmm / mm2in));
-        double edge = width;
+        double ampTot = (dpi * (LINEAR_amplTotmm / mm2in));
+
+        double center = (double) (w/2);
 
         double hf = ((double) h) / ((double) (p.size()));
-        drawLine(w, 0, w, 0);
+        drawLine(0, 0, w, 0);
 
-        double inc = 2;
-        for (double i = 1; i < p.size(); i = i + 2) {
+        double inc = 1;
+        for (double i = 1; i < p.size(); i = i + inc) {
             Point2D p1 = p.get((int) i);
             double vol = p1.getY();
             double volf = (-min + vol) / (max - min);
-            double wf = amplHeight * volf;
+            double wf = ampTot * volf;
             double y = i * hf;
-            drawLineTo(edge + wf, y);
+            double newX= center + wf;
+            drawLineTo(newX, y);
         }
 //        drawLineTo(w, h);
 //        drawLineTo(0, h);
 //        drawLineTo(0, 0);
 
-        writer.println("\" stroke=\"black\" fill=\"none\" />");
+        writer.println("\" stroke=\"black\" stroke-width=\"0.1\" fill=\"none\" />");
     }
 
     private void drawAsLineCutsSVG(ArrayList<Point2D> p) {
