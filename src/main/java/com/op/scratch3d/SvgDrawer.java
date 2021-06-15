@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class SvgDrawer {
 
     int numSvgs = 0;
+    int dScale = 2;
     int svgFileLimit = 2000;
     boolean splitSVG = false;
     PrintWriter writer;
@@ -74,6 +75,12 @@ public class SvgDrawer {
     void drawAndAddArc(double xc, double yc, double rad, int largeArcFlag, int sweepFlag, double angSt, double angEn) {
         StringBuffer sb = new StringBuffer();
         sb.append(addArc(xc, yc, rad, largeArcFlag, sweepFlag, angSt, angEn));
+        writeToSVG(sb);
+    }
+
+    void drawAndAddArcD2(double xc, double yc, double rad, int largeArcFlag, int sweepFlag, double angSt, double angEn) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(addArcD2(xc, yc, rad, largeArcFlag, sweepFlag, angSt, angEn));
         writeToSVG(sb);
     }
 
@@ -280,6 +287,22 @@ public class SvgDrawer {
         return d;
     }
 
+    String addArcD2(double cx, double cy, double radius, int largeArcFlag, int sweepFlag, double startAngle, double endAngle) {
+
+        VertexGeometric start = polarToCartesian(cx, cy, radius, startAngle);
+        VertexGeometric end = polarToCartesian(cx, cy, radius, endAngle);
+
+        String d = "M" + formatD2(start.x) + " " + formatD2(start.y) + " A " + formatD2(radius) + " " + formatD2(radius)
+                + " 0" + " " + largeArcFlag + " " + sweepFlag + " " + formatD2(end.x) + " " + formatD2(end.y);
+
+        if ((int) start.x == 38 && (int) start.y == 956) {
+            boolean a = false;
+        }
+
+        calculateSeconds(radius, Math.abs(startAngle - endAngle));
+        return d;
+    }
+
     private void calculateSeconds(double rad, double ext) {
         double c = 2 * Math.PI * rad;
         double angF = ((double) ext) / 360.0;
@@ -472,7 +495,7 @@ public class SvgDrawer {
     }
 
     private double formatD2(double d) {
-        return new BigDecimal(d).setScale(2,
+        return new BigDecimal(d).setScale(dScale,
                 BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

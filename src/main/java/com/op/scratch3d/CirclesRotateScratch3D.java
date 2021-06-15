@@ -22,12 +22,11 @@ public class CirclesRotateScratch3D extends Base {
     private String objDir = hostDir + "objFiles/";
 
     //private String obj = "cube1";
-    //private String obj = "CubeWalls2";
     //private String obj = "CubeHoles1";
-    private String obj = "CubeNumbers1";
+    private String obj = "CubeWalls2";
+    //private String obj = "CubeNumbers1";
     //private String obj = "cone1";
     private String src = "CIRSROTscratch3D-" + obj;
-    private boolean saveSVG = true;
     // double dpi = 1000;
     //double dpi = 3.779527559055118;
     double dpi = 300;
@@ -51,17 +50,11 @@ public class CirclesRotateScratch3D extends Base {
     private int numSamples = (int) (360 / angInc);
     private boolean adjustForPerspective = false;
     private boolean occlude = true;
-    private boolean drawBits = true;
+    private boolean drawBits = false;
 
     private double objectCenterRad = w * 0.4;
-    private double scale = 50;
+    private double scale = 45;
     private int numPaths = 0;
-    private ArrayList<BufferedImage> obis = new ArrayList<>();
-    private ArrayList<Graphics2D> opGs = new ArrayList<>();
-    private boolean drawForGif = false;
-    private String animDir = hostDir + "animate/";
-    private int frameTime = 50;
-    private double glintAng = 2;
 
     private static CirclesRotateScratch3D scratch3D = new CirclesRotateScratch3D();
 
@@ -75,9 +68,7 @@ public class CirclesRotateScratch3D extends Base {
 
         originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
         vertexTransformer = new VertexTransformer(originalFaces, vanZ);
-        if (drawForGif) {
-            initPngs();
-        }
+
         drawAll();
 
         save();
@@ -97,16 +88,12 @@ public class CirclesRotateScratch3D extends Base {
         svgDrawer.startSVGPath(2);
 
         if (drawBits) {
-            angInc = 1;
+            angInc = 2;
             //drawByPointsBit(-90);
 
-            for (double a = 0; a < 360; a = a + 30) {
+            for (double a = 0; a < 360; a = a + 15) {
                 drawByPointsBit(a);
             }
-
-//            svgDrawer.endSVGPath("red");
-//            svgDrawer.startSVGPath(2);
-//            drawPoints();
 
         } else {
             //drawByPoints(89);
@@ -121,24 +108,26 @@ public class CirclesRotateScratch3D extends Base {
     private void drawPoints() {
         Map<Double, ArrayList<ArcScratchDefs>> ang2visiblesByAng = new HashMap<>();
         for (double a = 0; a < 360; a = a + angInc) {
-            ArrayList<ArcScratchDefs> visiblesAllPointsByAng = collectedDataByPoints(-a);
+            ArrayList<ArcScratchDefs> visiblesAllPointsByAng = collectedDataByPoints(a);
             ang2visiblesByAng.put(a, visiblesAllPointsByAng);
         }
         int v = 0;
         for (VertexGeometric vg : allPoints) {
             System.out.println("point=" + v + " of " + allPoints.size());
-            double st = 180;
+            double st = 0;
             double arcSt = st;
             double arcEn = st + angInc;
             boolean lastArcOn = false;
 
+            ArrayList<ArcScratchDefs> defsPerPoint1 = ang2visiblesByAng.get(0.0);
+            ArcScratchDefs defs1 = defsPerPoint1.get(v);
+            double r = defs1.r;
+            double xc = defs1.cx;
+            double yc = defs1.cy;
             for (double angInd = 0; angInd < 360; angInd = angInd + angInc) {
-                ArrayList<ArcScratchDefs> defsPerAng = ang2visiblesByAng.get(angInd);
-                ArcScratchDefs defs = defsPerAng.get(v);
+                ArrayList<ArcScratchDefs> defsPerPoint = ang2visiblesByAng.get(angInd);
+                ArcScratchDefs defs = defsPerPoint.get(v);
 
-                double r = defs.r;
-                double xc = defs.cx;
-                double yc = defs.cy;
                 boolean arcOn = defs.visible;
 
                 double arcSt2 = arcSt;
@@ -166,6 +155,77 @@ public class CirclesRotateScratch3D extends Base {
     }
 
     private ArrayList<ArcScratchDefs> collectedDataByPoints(double a) {
+        ArrayList<Face> rotatedFaces = getAllRotatedFacesByAngle(a);
+
+        ArrayList<ArcScratchDefs> allDefs = new ArrayList<>();
+        for (VertexGeometric point : allPoints) {
+            VertexGeometric rotatedPoint = rotatePointByAngle(point, a);
+            double[] xyzr = getPointsScaled(point);
+
+            ArcScratchDefs defs = new ArcScratchDefs();
+            defs.cx = xyzr[0];
+            defs.cy = xyzr[1];
+            defs.r = xyzr[3];
+            defs.visible = (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, rotatedPoint)));
+            allDefs.add(defs);
+//            if (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, p1))) {
+//                double s = a + angInc / 2;
+//                double e = s - angInc;
+////                drawSVGSrc(vg, r, x, y, s, e, i);
+//            } else {
+//            }
+        }
+
+        return allDefs;
+    }
+
+    private void drawByPointsBit(double a) {
+        double aa = a;
+        ArrayList<Face> rotatedFaces = getAllRotatedFacesByAngle(a);
+        int i = 0;
+        for (VertexGeometric vg : allPoints) {
+            System.out.println("point=" + i + " of " + allPoints.size());
+
+            VertexGeometric p1 = rotatePointByAngle(vg, a);
+            double[] ps = getPointsScaled(vg);
+
+            if (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, p1))) {
+                double s =  a - angInc / 2;
+                double e = s + angInc;
+                drawSVGSrc(vg, ps[3], ps[0], ps[1], s, e, i);
+            } else {
+                int ii = 0;
+            }
+
+        }
+    }
+
+    private double[] getPointsScaled(VertexGeometric vg) {
+        double x = vg.x * scale;
+        double y = vg.y * scale;
+        double z = getScaleForPerspectiveAdjusts(vg) * scale;
+        double r = objectCenterRad + z;
+
+        double[] arr = {x, y, z, r};
+        return arr;
+    }
+
+    private VertexGeometric rotatePointByAngle(VertexGeometric vg, double angle) {
+        double x = vg.x * scale;
+        double y = vg.y * scale;
+        double z = getScaleForPerspectiveAdjusts(vg) * scale;
+        double r = objectCenterRad + z;
+
+        double xc = cx + x;
+        double yc = cy + y;
+        double ang = Math.toRadians(angle);
+        double xx = xc + r * Math.cos(ang);
+        double yy = yc - r * Math.sin(ang);
+
+        VertexGeometric p1 = new VertexGeometric((float) xx, (float) yy, (float) vg.z);
+        return p1;
+    }
+    private ArrayList<Face> getAllRotatedFacesByAngle(double a) {
         ArrayList<Face> rotatedFaces = new ArrayList<Face>();
         for (Face face : originalFaces) {
             Face newFace = new Face();
@@ -182,68 +242,6 @@ public class CirclesRotateScratch3D extends Base {
                 double yc = cy + y;
                 double ang = Math.toRadians(a);
                 double xx = xc + r * Math.cos(ang);
-                double yy = yc + r * Math.sin(ang);
-
-                VertexGeometric p1 = new VertexGeometric((float) xx, (float) yy, (float) vg.z);
-
-                fv2.v = p1;
-                newFace.vertices.add(fv2);
-            }
-            rotatedFaces.add(newFace);
-        }
-        int i = 0;
-
-        ArrayList<ArcScratchDefs> allDefs = new ArrayList<>();
-        for (VertexGeometric vg : allPoints) {
-
-            double x = vg.x * scale;
-            double y = vg.y * scale;
-            double z = getScaleForPerspectiveAdjusts(vg) * scale;
-            double r = objectCenterRad + z;
-
-            double xc = cx + x;
-            double yc = cy + y;
-            double ang = Math.toRadians(a);
-            double xx = xc + r * Math.cos(ang);
-            double yy = yc + r * Math.sin(ang);
-
-            VertexGeometric p1 = new VertexGeometric((float) xx, (float) yy, (float) vg.z);
-
-            ArcScratchDefs defs = new ArcScratchDefs();
-            defs.cx = x;
-            defs.cy = y;
-            defs.r = r;
-            defs.visible = (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, p1)));
-            allDefs.add(defs);
-            if (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, p1))) {
-                double s = a + angInc / 2;
-                double e = s - angInc;
-//                drawSVGSrc(vg, r, x, y, s, e, i);
-            } else {
-            }
-        }
-
-        return allDefs;
-    }
-
-    private void drawByPointsBit(double a) {
-        double aa = a;
-        ArrayList<Face> rotatedFaces = new ArrayList<Face>();
-        for (Face face : originalFaces) {
-            Face newFace = new Face();
-            for (FaceVertex fv : face.vertices) {
-                FaceVertex fv2 = new FaceVertex();
-                VertexGeometric vg = new VertexGeometric(fv.v.x, fv.v.y, fv.v.z);
-
-                double x = vg.x * scale;
-                double y = vg.y * scale;
-                double z = getScaleForPerspectiveAdjusts(vg) * scale;
-                double r = objectCenterRad + z;
-
-                double xc = cx + x;
-                double yc = cy + y;
-                double ang = Math.toRadians(aa);
-                double xx = xc + r * Math.cos(ang);
                 double yy = yc - r * Math.sin(ang);
 
                 VertexGeometric p1 = new VertexGeometric((float) xx, (float) yy, (float) vg.z);
@@ -253,83 +251,13 @@ public class CirclesRotateScratch3D extends Base {
             }
             rotatedFaces.add(newFace);
         }
-        int i = 0;
-        for (VertexGeometric vg : allPoints) {
-            System.out.println("point=" + i + " of " + allPoints.size());
 
-            double x = vg.x * scale;
-            double y = vg.y * scale;
-            double z = getScaleForPerspectiveAdjusts(vg) * scale;
-            double r = objectCenterRad + z;
-
-            double xc = cx + x;
-            double yc = cy + y;
-            double ang = Math.toRadians(aa);
-            double xx = xc + r * Math.cos(ang);
-            double yy = yc - r * Math.sin(ang);
-
-            VertexGeometric p1 = new VertexGeometric((float) xx, (float) yy, (float) vg.z);
-
-            if (!occlude || (occlude && objLoader.isVertexVisibleForVertex(rotatedFaces, p1))) {
-                double s =  a - angInc / 2;
-                double e = s + angInc;
-                drawSVGSrcBit(vg, r, x, y, s, e, i);
-            } else {
-                int ii = 0;
-            }
-
-        }
+        return rotatedFaces;
     }
 
     double getScaleForPerspectiveAdjusts(VertexGeometric p) {
         double sc = (p.z + 1) / 2;
         return sc;
-    }
-
-    double getScaleForPerspectiveAdjustsOLD(VertexGeometric p) {
-        double sc = (vanZ - p.z) / vanZ;
-        return sc;
-    }
-
-    private int drawVisibleArcs(boolean[] visibles, VertexGeometric vg) {
-        double x = vg.x * scale;
-        double y = vg.y * scale;
-        double z = getScaleForPerspectiveAdjusts(vg) * scale;
-        double r = objectCenterRad + z;
-
-        double st = -90;
-        double arcSt = st;
-        double arcEn = st + angInc;
-        boolean lastArcOn = false;
-
-        int arcCount = 0;
-        for (int i = 0; i < visibles.length; i++) {
-            double arcSt2 = arcSt;
-            double arcEn2 = arcEn;
-            boolean arcOn = visibles[i];
-            if (arcOn) {
-                if (drawForGif) {
-                    drawOnPNG(cx + x, cy - y, r, arcSt2, arcSt2 + angInc, i);
-                }
-                if ((i == visibles.length - 1)) {
-                    drawSVGSrc(vg, r, x, y, arcSt2, arcEn2 - angInc, i);
-                    arcCount++;
-                }
-                lastArcOn = true;
-                arcEn = arcEn + angInc;
-            } else {
-                if (lastArcOn) {
-                    drawSVGSrc(vg, r, x, y, arcSt2, arcEn2 - angInc, i);
-                    arcCount++;
-                    arcSt = arcEn;
-                }
-                lastArcOn = false;
-                arcEn = arcEn + angInc;
-                arcSt = arcSt + angInc;
-            }
-        }
-
-        return arcCount;
     }
 
     void drawSVGSrc(VertexGeometric vg, double r, double xc, double yc, double stAng, double enAng, int frame) {
@@ -339,122 +267,12 @@ public class CirclesRotateScratch3D extends Base {
         double x = cx + xc;
         double y = cy - yc;
         int largeArcFlag = (e-s) <= 180 ? 0 : 1;
-        int sweepFlag = (e-s) >= 270 ? 0 : 0;
-        svgDrawer.drawAndAddArc(x, y, r, largeArcFlag, sweepFlag, s, e + 0.1);
-    }
-
-    void drawSVGSrcBit(VertexGeometric vg, double r, double xc, double yc, double stAng, double enAng, int frame) {
-        double g = 0;
-        double s = (stAng) + g;
-        double e = (enAng) + g;
-//        svgDrawer.drawAndAddArc(cx + xc, cy - yc, r, s, e + 0.1);
-
-        int largeArcFlag = (e-s) <= 180 ? 0 : 1;
-        int sweepFlag = 1; //(e-s) > 270 ? 0 : 1;
-        svgDrawer.drawAndAddArc(cx+xc, cy-yc, r, largeArcFlag, sweepFlag, s, e + 0.1);
-    }
-
-    private void drawOnPNG(double xc, double yc, double rad, double angSt, double angEn, int frame) {
-        Graphics2D opG = opGs.get(frame);
-        opG.setColor(Color.BLACK);
-        int x1 = (int) (xc - rad);
-        int y1 = (int) (yc - rad);
-        int dd = (int) (rad * 2);
-        double midAng = (angEn - angSt) / 2;
-        int angOff = (int) (90 + angInc * frame - angInc / 2);
-        int st = (int) (midAng - (glintAng / 2));
-        int en = (int) (glintAng / 2);
-        opG.drawArc(x1, y1, dd, dd, angOff + st, en);
+        int sweepFlag = 1; //(e-s) >= 270 ? 0 : 0;
+        svgDrawer.drawAndAddArcD2(x, y, r, largeArcFlag, sweepFlag, s, e - 0.1);
     }
 
     private void save() throws Exception {
-        if (saveSVG) {
-            svgDrawer.endSVG();
-        }
-        if (drawForGif) {
-            savePngsForGif();
-            saveAsGIF();
-        }
-    }
-
-    void savePngsForGif() {
-        int i = 0;
-        ArrayList<BufferedImage> subs = new ArrayList<>();
-        for (BufferedImage obi : obis) {
-            double cx = w / 2;
-            double cy = (h / 2) - objectCenterRad;
-            double d = scale * 5;
-            BufferedImage bi = obi.getSubimage((int) (cx - (d / 2)), (int) (cy - (d / 2)), (int) (d), (int) (d));
-            subs.add(bi);
-            savePNGFile(obi, opDir + "GIF/" + src + "_" + i + "_OUT.png", dpi);
-            i++;
-        }
-        obis = new ArrayList<>();
-        for (BufferedImage sub : subs) {
-            obis.add(sub);
-        }
-    }
-
-    public void saveAsGIF() {
-        BufferedImage firstImage = obis.get(0);
-
-        String out = animDir + obj + ".gif";
-        File fOut = new File(out);
-        if (fOut.exists()) {
-            fOut.delete();
-        }
-
-        ImageOutputStream output = null;
-        try {
-            output = new FileImageOutputStream(fOut);
-        } catch (IOException e) {
-            System.out.println("error gif " + e);
-            e.printStackTrace();
-        }
-
-        try {
-            GifSequenceWriter writer = new GifSequenceWriter(output,
-                    firstImage.getType(), +frameTime + "", true);
-
-            writer.writeToSequence(firstImage);
-            for (int i = 0; i < numSamples + 1; i++) {
-                BufferedImage nextImage = obis.get(i);
-                writer.writeToSequence(nextImage);
-            }
-
-            writer.close();
-            output.close();
-            System.out.println("saved gif " + out);
-
-        } catch (IOException e) {
-            System.out.println("error gif " + e);
-            e.printStackTrace();
-        }
-
-        //Base.savePNGFile(obi, animDir+obj+".png", 300);
-    }
-
-    private void initPngs() {
-        System.out.println("initialising...");
-        int ww = (int) w;
-        int hh = (int) h;
-        obis = new ArrayList<>();
-        opGs = new ArrayList<>();
-        if (drawForGif) {
-            for (int i = 0; i < numSamples + 1; i++) {
-                BufferedImage obi = new BufferedImage(ww, hh, BufferedImage.TYPE_INT_RGB);
-                Graphics2D opG = (Graphics2D) obi.getGraphics();
-                opG.setColor(Color.WHITE);
-                opG.fillRect(0, 0, ww, hh);
-                opG.setColor(Color.BLACK);
-                int c = obi.getHeight() / 2;
-                double ang = angInc * i;
-                opG.rotate(Math.toRadians(ang), c, c);
-                obis.add(obi);
-                opGs.add(opG);
-            }
-        }
-        System.out.println("initialised");
+        svgDrawer.endSVG();
     }
 
 }
