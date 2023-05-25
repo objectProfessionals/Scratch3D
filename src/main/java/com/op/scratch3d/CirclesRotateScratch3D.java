@@ -5,16 +5,8 @@ import com.owens.oobjloader.builder.Face;
 import com.owens.oobjloader.builder.FaceVertex;
 import com.owens.oobjloader.builder.VertexGeometric;
 
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CirclesRotateScratch3D extends Base {
 
@@ -22,9 +14,12 @@ public class CirclesRotateScratch3D extends Base {
     private String objDir = hostDir + "objFiles/";
 
     //private String obj = "cube1";
+    private String obj = "CubeEdges";
     //private String obj = "CubeHoles1";
-    private String obj = "CubeWalls2";
+    //private String obj = "CubeWalls2";
     //private String obj = "CubeNumbers1";
+    //private String obj = "Letter-S";
+    //private String obj = "SW-Falcon6";
     //private String obj = "cone1";
     private String src = "CIRSROTscratch3D-" + obj;
     // double dpi = 1000;
@@ -47,13 +42,11 @@ public class CirclesRotateScratch3D extends Base {
     VertexTransformer vertexTransformer;
 
     private double angInc = 1;
-    private int numSamples = (int) (360 / angInc);
-    private boolean adjustForPerspective = false;
     private boolean occlude = true;
     private boolean drawBits = false;
 
-    private double objectCenterRad = w * 0.4;
-    private double scale = 45;
+    private double objectCenterRad = w* 0.375; //w * 0.4;
+    private double scale = w * 0.045; //w*0.075; //45;
     private int numPaths = 0;
 
     private static CirclesRotateScratch3D scratch3D = new CirclesRotateScratch3D();
@@ -64,9 +57,10 @@ public class CirclesRotateScratch3D extends Base {
 
     private void draw() throws FileNotFoundException, Exception {
         objLoader.equalsTol = 0.0001;
-        svgDrawer.startSVG(false, true, 1, 0.1, 0.5);
+        svgDrawer.startSVG(false, true, 1, 0.1, 0.5, false);
 
         originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
+        orderAllPointsByZIncreasing(allPoints);
         vertexTransformer = new VertexTransformer(originalFaces, vanZ);
 
         drawAll();
@@ -75,18 +69,18 @@ public class CirclesRotateScratch3D extends Base {
     }
 
     private void drawAll() {
-        svgDrawer.startSVGPath(1);
+//        svgDrawer.startSVGPath(1);
         System.out.println("drawAllPoints started...");
         String sd1 = svgDrawer.addLine(cx - 10, cy - 10, cx + 10, cy + 10);
         svgDrawer.writeToSVG(sd1);
         String sd2 = svgDrawer.addLine(cx - 10, cy + 10, cx + 10, cy - 10);
         svgDrawer.writeToSVG(sd2);
-        svgDrawer.endSVGPath("red");
+//        svgDrawer.endSVGPath("red");
 
         //drawFromOriginals();
 
-        svgDrawer.startSVGPath(2);
-
+//        svgDrawer.startSVGPath(2);
+//
         if (drawBits) {
             angInc = 2;
             //drawByPointsBit(-90);
@@ -193,10 +187,8 @@ public class CirclesRotateScratch3D extends Base {
                 double s =  a - angInc / 2;
                 double e = s + angInc;
                 drawSVGSrc(vg, ps[3], ps[0], ps[1], s, e, i);
-            } else {
-                int ii = 0;
             }
-
+            i++;
         }
     }
 
@@ -268,7 +260,7 @@ public class CirclesRotateScratch3D extends Base {
         double y = cy - yc;
         int largeArcFlag = (e-s) <= 180 ? 0 : 1;
         int sweepFlag = 1; //(e-s) >= 270 ? 0 : 0;
-        svgDrawer.drawAndAddArcD2(x, y, r, largeArcFlag, sweepFlag, s, e - 0.1);
+        svgDrawer.drawAndAddArcD2(x, y, r, largeArcFlag, sweepFlag, s, e - 0.01);
     }
 
     private void save() throws Exception {

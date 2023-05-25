@@ -32,10 +32,10 @@ public abstract class ArcScratchBase extends Base {
     boolean adjustForPerspective = true;
     boolean occlude = true;
 
-    double sf = 0.55;//1.1
-    double sweepAng = 15;
+    double sf = 0.25; //0.45;//1.1
+    double sweepAng = 30;
     double totalAngle = sweepAng * 2;
-    double num = 15;//20
+    double num = sweepAng;//20
     double angInc = totalAngle / num;
 
     ArrayList<VertexGeometric> allPoints = new ArrayList<VertexGeometric>();

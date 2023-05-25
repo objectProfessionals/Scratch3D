@@ -9,6 +9,8 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 public class Base {
@@ -123,6 +125,15 @@ public class Base {
         BufferedImage opImage;
         opImage = new BufferedImage(ww, hh, BufferedImage.TYPE_INT_RGB);
         return opImage;
+    }
+
+    protected void orderAllPointsByZIncreasing(ArrayList<VertexGeometric> points) {
+        Collections.sort(points, new Comparator<VertexGeometric>() {
+            @Override
+            public int compare(VertexGeometric o1, VertexGeometric o2) {
+                return Float.valueOf(o1.z).compareTo(Float.valueOf(o2.z));
+            }
+        });
     }
 
 //    public static void saveJPGFile(BufferedImage opImage, String filePath, double dpi, float quality) {

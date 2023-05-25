@@ -27,7 +27,7 @@ public class SvgDrawer {
 
     double seconds = 0;
     double writeSpeed = 0.25; //25%
-    double ppmm = (787.0 / 300.0);
+    double ppmm = (755.90551 / 200.0);
     double pixPerSec = 3 * ppmm / writeSpeed; //25%
     double secondsTravel = 0.2;
 
@@ -121,7 +121,7 @@ public class SvgDrawer {
     }
 
     public void startSVG(boolean square, boolean circle) {
-        startSVG(square, circle, 1, 0.5, 0.125);
+        startSVG(square, circle, 1, 0.5, 0.125, true);
     }
 
     public void startSimpleSVG() {
@@ -150,7 +150,7 @@ public class SvgDrawer {
         writer.println("M" + (ddx - sq) + " " + ddy + " L" + ddx + " " + ddy + " L" + ddx + " " + (ddy - sq));
     }
 
-    void startSVG(boolean square, boolean circle, int times, double radFIn, double radFOut) {
+    void startSVG(boolean square, boolean circle, int times, double radFIn, double radFOut, boolean doEndPath) {
         this.square = square;
         this.circle = circle;
         if (splitSVG) {
@@ -197,7 +197,10 @@ public class SvgDrawer {
                 writer.println(addCircleD2((int) (w / 2), (int) (h / 2), (int) (w * radFOut), 0, 359));
             }
         }
-        endSVGPath("black");
+
+        if (doEndPath) {
+            endSVGPath("black");
+        }
 
     }
 
@@ -232,7 +235,10 @@ public class SvgDrawer {
         writer.println("</svg>");
         writer.close();
         System.out.println("saved svg: " + opDir + src + "_" + svgFileCount + ".svg numSvgs=" + numSvgs);
-        System.out.println("estimated seconds: " + ((int) seconds));
+        int secs = ((int) seconds);
+        int mins = secs/60;
+        secs = secs - (mins*60);
+        System.out.println("estimated mins: "+ mins +" seconds: " + secs);
     }
 
     VertexGeometric polarToCartesian(double centerX, double centerY, double radius, double angleInDegrees) {
@@ -497,5 +503,10 @@ public class SvgDrawer {
     private double formatD2(double d) {
         return new BigDecimal(d).setScale(dScale,
                 BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public void startSVG(boolean b, boolean b1, int i, double v, double v1) {
+
+        startSVG(b, b1, i, v, v1, true);
     }
 }

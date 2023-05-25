@@ -42,10 +42,12 @@ public class LinearRotateScratch3D extends Base {
     //private String obj = "Circles1";
     //private String obj = "SW-tieBest1";
     //private String obj = "cube1";
-    private String obj = "CubeWalls";
+    //private String obj = "CubeWalls";
     //private String obj = "CubeHoles1";
     //private String obj = "CubeNumbers";
     //private String obj = "cone1";
+    private String obj = "CubeEdges";
+
     private String src = "LINROTscratch3D-" + obj;
     private boolean saveSVG = true;
     // double dpi = 1000;
@@ -71,15 +73,15 @@ public class LinearRotateScratch3D extends Base {
     VertexTransformer vertexTransformer;
     private double sepFac = 5;
 
-    private double angInc = 5;
-    private double radFac = 50;
+    private double angInc = 30;
     private double numPng = 360 / angInc; //20;
     private boolean adjustForPerspective = true;
     private boolean occlude = true;
     private boolean dots = false;
     private boolean arcs = true;
-    private double angArc = 10;
-    private boolean byAngles = true;
+    private double arcRadFac = -50;
+    private double arcAng = angInc*1.5;
+    private boolean byAngles = false;
     private boolean drawForGif = false;
     boolean selectedOnly = false;
     ArrayList<VertexGeometric> selectedVerts = new ArrayList<VertexGeometric>();
@@ -102,6 +104,7 @@ public class LinearRotateScratch3D extends Base {
         svgDrawer.startSVG(false, true, 1, 0.1, 0.5);
 
         originalFaces = objLoader.loadOBJ(objDir + obj, allPoints);
+        orderAllPointsByZIncreasing(allPoints);
         if (selectedOnly) {
             selectedVerts = objLoader.loadOBJSelectedVerts(objDir + obj + "_sel");
         }
@@ -244,7 +247,7 @@ public class LinearRotateScratch3D extends Base {
         double z = vg.z * scale;
         double rSepF = 0.1 + (1.5 * scale + z) / (3 * scale);
 
-        double rad = radFac * rSepF;
+        double rad = arcRadFac * rSepF;
 
         double angRad = Math.toRadians(ang);
         double angRad2 = Math.toRadians(ang - 90);
@@ -258,8 +261,7 @@ public class LinearRotateScratch3D extends Base {
 
         double xx1 = ccx + xx - rad * Math.cos(angRad2);
         double yy1 = ccy - yy - rad * Math.sin(angRad2);
-        double angIncOff = (angInc / 2);
-        //double angIncOff = (angArc / 2);
+        double angIncOff = (arcAng / 2);
         String lin = svgDrawer.addArc(xx1, yy1, rad, ang - angIncOff - 90, ang + angIncOff - 90);
         svgDrawer.writeToSVG(lin);
     }

@@ -60,13 +60,17 @@ public class ArcScratch3D extends ArcScratchBase {
     //private String obj = "SW-LowPolyTie3";
     //private String obj = "SW-Falcon6";
     //private String obj = "SW-Tie";
+    //private String obj = "SW-TieFin";
     //private String obj = "SW-TieLow";
     //private String obj = "SW-TrooperPlane";
     //private String obj = "Gear";
     //private String obj = "pyramid";
     //private String obj = "CubeT";
     //private String obj = "Cube";
-    private String obj = "CubeHoles";
+    //private String obj = "CubeHoles";
+    //private String obj = "SWTieExport";
+    private String obj = "CubeHoleLow";
+
 
 
     private String src = "ARCscratch3D-" + obj;

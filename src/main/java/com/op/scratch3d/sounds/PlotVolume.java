@@ -19,14 +19,16 @@ import static java.lang.Math.abs;
 public class PlotVolume extends Base {
     private static final String SPIRAL_LINE = "SpiralLine";
     private static final String SPIRAL_LINE_SCORE = "SpiralLineScore";
+    private static final String SPIRAL_LINE_SINGLE = "SpiralLineSingle";
     private static final String SPIRAL = "Spiral";
     private static final String CIRCLE = "circle";
     private static final String LINEAR = "linear";
     private static final String LINEAR_SCORE = "score";
     private static final String LINEAR_MULTI_SCORE = "mscore";
     private static final String LINEAR_CUTS = "cuts";
-    private static final String typeName = LINEAR;
-    private static final String scName = "ILoveYouVirga500"; // "hello20";
+    private static final String typeName = SPIRAL_LINE_SINGLE;
+    private static final String scName = "ILoveYouMono1000"; // "hello20";
+    //private static final String scName = "ILoveYouVirga500"; // "hello20";
     //private static final String scName = "ILoveYouMax1"; // "hello20";
     //private static final String scName = "ILoveYou20"; // "hello20";
     //private static final String scName = "sine100-500-0.3s"; // "hello20";
@@ -43,14 +45,14 @@ public class PlotVolume extends Base {
     private double mm2in = 25.4;
     //    private double wmm = 200;
 //    private double hmm = 200;
-    private double wmm = 10.0;//LINEAR
-    private double hmm = 584.2;//w = 9.79
+    private double wmm = 200.0;//LINEAR
+    private double hmm = 200.0;//w = 9.79
     private int w = (int) (dpi * (wmm / mm2in));
     private int h = (int) (dpi * (hmm / mm2in));
     private int cx = w / 2;
     private int cy = h / 2;
     private boolean addBorder = true;
-    private boolean outline = true;
+    private boolean outline = false;
     private double bordermm = 20;
     private double border = (dpi * (bordermm / mm2in));
     private double max = -1;
@@ -58,7 +60,7 @@ public class PlotVolume extends Base {
     private PrintWriter writer;
     private String cut = "";
     private String cutO = "";
-    double LINEAR_amplTotmm = 0.5; //25;
+    double LINEAR_amplTotmm = 1; //25;
 
     public static void main(String[] args) throws Exception, FontFormatException {
         tester = new PlotVolume();
@@ -106,6 +108,8 @@ public class PlotVolume extends Base {
             drawAsSpiral(p);
         } else if (typeName.equals(SPIRAL_LINE)) {
             drawAsSpiralLine(p);
+        } else if (typeName.equals(SPIRAL_LINE_SINGLE)) {
+            drawAsSpiralLineSingle(p);
         } else if (typeName.equals(SPIRAL_LINE_SCORE)) {
             drawAsSpiralLineScore(p);
         } else if (typeName.equals(CIRCLE)) {
@@ -497,13 +501,13 @@ public class PlotVolume extends Base {
         int xc = w / 2;
         int yc = h / 2;
         int inc = 1;
-        double frr = -0.113; //-0.15;
+        double frr = -0.05; //-0.15;
         double afr = -0.05; //-0.024;
-        double amplHeightmm = 0.25;
+        double amplHeightmm = 1;
         double amplHeight = (dpi * (amplHeightmm / mm2in));
-        double cutHeightmm = 3;
+        double cutHeightmm = 1;
         double cutHeight = (dpi * (cutHeightmm / mm2in));
-        double radStartmm = wmm * 4 / 10;
+        double radStartmm = wmm * 0.5;
         double radStart = (dpi * (radStartmm / mm2in));
         double ang = 0;
         ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
@@ -659,7 +663,64 @@ public class PlotVolume extends Base {
         double len = pl.lengthOfPath();
         double lenmm = mm2in * (len / dpi);
         System.out.println("**** LENpx=" + len + "LENmm=" + lenmm);
+    }
 
+    private void drawAsSpiralLineSingle(ArrayList<Point2D> ps) {
+        int y = 0;
+        int x = 0;
+        int xc = w / 2;
+        int yc = h / 2;
+        int sample = 2;
+        double radStartmm = wmm * 0.3;
+        double frAngMultiplier = 0.05;//13; //-0.15;
+        double frAngAddPerPoint = 0.01; //-0.024;
+        double amplHeightmm = 1;
+        double amplHeight = (dpi * (amplHeightmm / mm2in));
+        double radStart = (dpi * (radStartmm / mm2in));
+        double ang = 0;
+        ArrayList<Point2D.Double> out = new ArrayList<Point2D.Double>();
+        Point2D.Double first = null;
+
+        writer.println("<path d=\"");
+        Path2D.Double path = new Path2D.Double();
+        int i = 0;
+        for (; i < ps.size(); i = i + sample) {
+            Point2D p1 = ps.get(i);
+            double vol = p1.getY();
+            double yy = (-min + vol) / (max - min);
+            double rF = (0.5 - yy) * amplHeight;
+
+            double angDeg = Math.toRadians(ang);
+            double x1 = xc + Math.cos(angDeg) * (radStart - (rF / 2.0));
+            double y1 = xc + Math.sin(angDeg) * (radStart - (rF / 2.0));
+
+            if (first == null) {
+                first = new Point2D.Double(x1, y1);
+                drawLine(x1, y1, x1, y1);
+            } else {
+                drawLineTo(x1, y1);
+            }
+            if (path.getCurrentPoint() == null) {
+                path.moveTo(x1, y1);
+            } else {
+                path.lineTo(x1, y1);
+            }
+
+            double cir = 2 * Math.PI * radStart;
+            double frAng = (360.0 / cir);
+            ang = ang + frAng + frAngAddPerPoint;
+
+            System.out.println("ang=" + ang);
+            // frr = frr + 0.0001;
+            radStart = radStart + frAng * frAngMultiplier;
+        }
+
+        writer.println("\" stroke=\"black\" fill=\"none\" />");
+
+        PathLength pl = new PathLength(path);
+        double len = pl.lengthOfPath();
+        double lenmm = mm2in * (len / dpi);
+        System.out.println("samples=" + i + "**** LENpx=" + len + "LENmm=" + lenmm);
     }
 
     String addLine(double x1, double y1, double x2, double y2) {
